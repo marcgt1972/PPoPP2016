@@ -1,0 +1,105 @@
+Deep neural networks (DNN) have recently achieved extraordinary 
+results in domains like computer vision and speech recognition [REFs]. 
+One key and essential element for this success
+has been the introduction of high performance computing (HPC)
+techniques within one critical step in the network deployment: the
+network training. Neural networks require a training stage with
+very high computational demands. Currently, the optimization of this stage
+has become the main bottleneck for a reasonable trade-off between the
+final network accuracy and the actual length of the
+training process [REF COTS, Downpour SGD and Sandblaster 
+L-BFGS]. 
+%In most recent and successful proposals, the training stage
+%takes about \todo{XXX hours} for a network with state-of-the-art 
+%accuracy [REFs]. Clearly, optimizing and accelerating this process are
+%key priorities in the DNN domain.
+
+During the training process, a gradient descent algorithm minimizes a pre-defined cost function [REF]. Most computations
+along this process correspond to basic linear algebra operations. In
+general, an optimal training algorithm is built upon a very specific 
+data layout mainly composed of matrices and vectors, and an iterative
+procedure that invokes specialized and highly optimized basic
+linear algebra subroutines (BLAS). All of the most relevant and
+widely used DNN frameworks (e,g.: Caffe [REF], Theano [REF]
+or Torch [REF]) follow this approach. When it comes to optimization, 
+GPU acceleration has been the most spread strategy. GPUs have
+shown extraordinary performance levels. They are massively
+parallel architectures for very fine grain parallelism and BLAS
+computations make a perfect fit for them. But in terms of programmability,
+porting the original code to GPU kernels requires significant programming 
+efforts. The general solution has been to use specialized 
+libraries like cuBLAS and cuDNN [REF to cuBLAS,
+cuDNN]). Unfortunately, this approach lacks from generality.
+Along the research cycle for DNNs, the optimal network architecture,
+parameters and data layout are unknown. So, the specialized
+GPU libraries are not yet available. Even for the case of cuDNN,
+only DNN transformations that are very well undersotood and no 
+longer in a research stage (e.g.: convolution and pooling operations),
+are supported, and with a strong bias to computer vision.
+
+An unexplored strategy is a CPU parallelization at a coarser level.
+Neural networks are trained with batches of data where each batch
+contains a fixed number of data samples. Each sample is used to
+advance the minimization of the cost function and all samples in
+the batch can be processed in parallel. This defines a much coarser
+thread level parallelism but adds complexity to the
+parallelization process: thread level parallelism has to be explicitly 
+introduced and race conditions appear for the network coefficient 
+update. This has made this option not fully explored by the
+DNN community although its potential is very significant. 
+The batch-level parallelism is inherent to the gradient descent 
+algorithm and produces immediate acceleration no matter the 
+nature of the network computations. It does not rely on a 
+particular optimal data layout nor the availability of any specialized 
+and highly optimized library for the network layers. So, its 
+activation does not require 
+any code porting efforts. We name this property as \textbf{network-agnostic}.
+Moreover, a batch-level parallelization does not change any 
+training parameter, thus it does not affect the convergence of the 
+gradient descent. This is important, because parallelization strategies 
+that do change the training parameters do not ensure convergence
+invariance. For instance, multi-GPU systems have been explored when 
+the batch and model parameters do not fit in the memory of a single GPU.
+The solution has been to reduce the batch size and make it fit in memory.
+But this changes the batch size and alters the convergence. In general, 
+doubling the number of GPUs having halved the batch size is never a 
+guarantee of observing a 2x speedup for the training 
+process [Baidu deep speech]. We name this property as \textbf{convergence-invariant}.
+
+%would enable a multi-GPU execution
+%without changing any parameter of the training algorithm. This is
+%important because the convergence rate would not be affected.
+%Multi-GPU systems have been explored, but only when the batch
+%and model parameters do not fit in the memory of a single GPU.
+%The solution has been to reduce the batch size and switch to 
+%multiple GPUs. But this approach changes the batch size and thus
+%alters the convergence. In general, doubling the number of GPUs
+%having halved the batch size is never a guarantee of observing a
+%2x speedup for the training process [Baidu deep speech].
+
+The main contribution of this paper is the implementation and
+analysis of a \textbf{network-agnostic} and \textbf{convergence-invariant} 
+coarse-grain parallelization of the DNN training algorithm.
+It exploits a parallelism level that is independent from the
+support of specialized and optimized libraries. Therefore, the
+optimization is immediately available for accelerating the DNN
+training. And it is compatible with multi-GPU execution without 
+altering the algorithm convergence rate. The parallelization has 
+been implemented in Caffe [REF], a state-of-the-art DNN framework. 
+The paper describes the code transformations for the parallelization 
+as well as we identify the limiting performance factors of the
+approach and expose appropriate optimizations. We show competitive 
+performance results for two state-of-the-art computer vision
+datasets, MNIST and CIFAR-10. In particular, in a \todo{16-core Xeon XXXX 
+at XXHz we observe speedups of XXX, at similar performance levels 
+of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.}
+
+The rest of this paper is organized as section 2, which 
+describes the main design aspects of Caffe regarding its 
+parallelization. Section 3 describes the code transformations 
+and optimizations for a batch-level parallelization of the 
+training core of Caffe. Section 4 analyses the performance 
+limiting factors of the approach and its overall performance. 
+Section 5 presents the related work and finally section 6 
+concludes the paper with its main conclusions.
+

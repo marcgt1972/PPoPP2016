@@ -1,0 +1,323 @@
+This section describes the parallelization process for a coarse-grain 
+parallelization of the Caffe DNN framework. First, we identify the 
+different sources of parallelism and their granularity. Second, we 
+describe the methodology to generate a coarse-grain parallelism version 
+of the algorithms exposed previously in section \ref{sec-caffe}. Finally, 
+we compare this approach to that of a fine-grain parallelization 
+corresponding to the GPU version.
+
+\subsection{Sources of Parallelism}
+Given the structure of the computation in algorithms \ref{alg-train}, 
+\ref{alg-forw} and \ref{alg-back}, the training procedure of a neural 
+network exposes several levels and types of parallelism.
+
+\subsubsection{BLAS Level Parallelism}
+This level of parallelism corresponds to the computations that 
+are based on basic linear algebra. It appears in the 
+BLAS computations applied in each data segment in the input/output blobs.
+In algortihms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line 
+6 in both cases hide this level of parallelism.
+
+In general, these computations correspond to matrix and
+vector operations like matrix-x-matrix and the matrix-x-vector
+products. Caffe includes a native and limited BLAS implementation that 
+can be substituted with specialized libraries like Atlas
+[REF], OpenBLAS [REF] or Intel MKL [REF]. These implementations are 
+highly optimized and exploit both thread level parallelism and SIMD level parallelism with vectorized code.
+
+\subsubsection{Blob Level Parallelism}
+This level of parallelism corresponds to the nested loops in the forward
+and backward phases in lines 2 and 5 in algorithms 
+\ref{alg-forw} and \ref{alg-back}. 
+These loops traverse the data segments in the input and output blobs and
+perform BLAS calls for each segment. This parallelism can be
+exploited with thread level parallelism as each BLAS call can be
+executed in parallel.
+
+In general, the dimensions of the input blob are layer dependant. Therefore the number of iterations in each loop level is also layer dependant. All loops are 
+interchangeable and parallel, given the appropriate data privatizations. 
+So, in order to have control of the most apprapriate loop scheduling, 
+loops can be rearranged in different manners. 
+
+\subsubsection{Batch Level Parallelism}
+This level corresponds to the loop in line 1 of algorithms \ref{alg-forw}
+and \ref{alg-back}. 
+This loop traverses the data samples in the batch and its parallelism 
+can be exploited but with limitations. 
+Specifically for the backward phase, it requires reduction operations 
+for the network coefficient update. The training algorithm averages all 
+gradients computed with each sample in the batch. This averaging
+has to be protected with mutual exclusion operations or ordered
+loops plus data privatization for the blobs that temporally store the
+gradients. 
+
+
+%\begin{algorithm}
+%\caption{Caffe layer forward phase}
+%\label{batch-forw-algo}
+%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+%\Input{Bottom blob (N, $D_1, D_2$, $\dots$, $D_N$)}
+%\Output{Top blob for the layer transformation}
+%\BlankLine
+%\For{$s \leftarrow 1$ \KwTo $S$}{
+%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
+  %\For{$d_2 \leftarrow 1$ \KwTo $D_2$}{
+%\BlankLine
+    %\dots
+%\BlankLine
+    %\For{$d_N \leftarrow 1$ \KwTo $D_N$}{
+      %top[f($d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}(W, bias, bottom[g($d_1,d_2$, $\dots$, $d_N$)]);
+%}
+%}
+%}
+%}
+%\end{algorithm}
+
+\begin{algorithm}
+\caption{Coarse-grain parallel layer forward phase}
+\label{alg-par-forw}
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+\Output{Top blob for the layer transformation}
+\BlankLine
+%\#pragma omp parallel for 
+\textbf{\#pragma omp parallel}
+\BlankLine
+\{
+\BlankLine
+\emph{/* Object Privatization */}
+\BlankLine
+\dots
+\BlankLine
+\textbf{\#pragma omp for private($s$, $d_1$, $d_2$, \dots)}
+\BlankLine
+\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$*$\dots$*$D_k$}{
+    \BlankLine
+    s = $f_s$(civ);
+    \BlankLine
+    $d_1$ = $f_1$(civ);
+    \BlankLine
+    $d_2$ = $f_2$(civ);
+    \BlankLine
+    \dots
+    \BlankLine
+    $d_k$ = $f_k$(civ);
+    \BlankLine
+    \For{$d_{\text{k+1}}$ $\leftarrow 1$ \KwTo $D_{\text{k+1}}$}{
+    \BlankLine
+    \dots
+    \BlankLine
+    \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
+      top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+}
+}
+}
+\}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Coarse-grain parallel layer backward phase}
+\label{alg-par-back}
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\Input{Gradient w.r.t. top blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+\Output{Gradient w.r.t. to bottom blob (M, $O_1, O_2$, $\dots$, $O_M$)}
+\BlankLine
+%\#pragma omp parallel for 
+\textbf{\#pragma omp parallel}
+\BlankLine
+\{
+\BlankLine
+\emph{/* Object Privatization */}
+\BlankLine
+Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
+\BlankLine
+caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs-bottom);
+\BlankLine
+\dots
+\BlankLine
+\textbf{\#pragma omp for private($s$, $d_1$, $d_2$, \dots)}
+\BlankLine
+\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$*$\dots$*$D_k$}{
+    \BlankLine
+    s = $f_s$(civ);
+    \BlankLine
+    $d_1$ = $f_1$(civ);
+    \BlankLine
+    $d_2$ = $f_2$(civ);
+    \BlankLine
+    \dots
+    \BlankLine
+    $d_k$ = $f_k$(civ);
+    \BlankLine
+    \For{$d_{\text{k+1}}$ $\leftarrow 1$ \KwTo $D_{\text{k+1}}$}{
+    \BlankLine
+    \dots
+    \BlankLine
+    \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
+      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+}
+}
+}
+\textbf{\#pragma omp for ordered}
+\BlankLine
+\For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
+  caffe\_add(diffs-bottom, private-diffs-bottom, \dots);
+}
+\}
+\end{algorithm}
+
+%\begin{algorithm}
+%\caption{Coalesced Caffe layer backward phase}
+%\label{par-back-algo}
+%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+%\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+%\Output{Top blob for the layer transformation}
+%\BlankLine
+%\#pragma omp parallel for private(s, $d_1$, $d_2$, \dots)
+%\BlankLine
+%\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$}{
+%%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
+  %%\For{$d_2 \leftarrow 1$ \KwTo $D_2$}{
+%\BlankLine
+    %s = $f_s$(civ);
+%\BlankLine
+    %$d_1$ = $f_1$(civ);
+%\BlankLine
+    %$d_2$ = $f_2$(civ);
+%\BlankLine
+    %\dots
+%\BlankLine
+    %\For{$d_N \leftarrow 1$ \KwTo $D_N$}{
+      %private\_diffs[f($d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}(W, bias, bottom[g($d_1,d_2$, $\dots$, $d_N$)]);
+%}
+%%}
+%%}
+%}
+%\BlankLine
+%\#pragma omp barrier 
+%\BlankLine
+%\#pragma omp for ordered
+%\BlankLine
+%\For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
+  %caffe\_add(diffs, private\_diffs, \dots);
+%}
+%\end{algorithm}
+
+
+\subsection{Code Transformations}
+Caffe follows an object-oriented design and C++ implementation. 
+Its main data structures and algorithms have been designed with 
+functional principles with the aim of giving support for neural network 
+development. In this paper, we have followed a methodology to 
+parallelize Caffe so that these principles are kept. We have 
+adopted restrictions for the code reorganization and optimization.
+To indicate the parallelism to be exploited, only directive-based 
+transformations have been applied. We have used OpenMP directives 
+to indicate which loops have to be paralellized. When ever possible, 
+we have used the OpenMP primitives to indicate data privatizations 
+and reduction operations, as well as the necessary synchronization 
+points along the parallel code. To increase performance, we have 
+applied very simple manual code transformations like loop coalescing or 
+loop interchange. Therefore, in order to enable a coarse-grain 
+parallelization, no object data structure has been modified and 
+the implementation of every Caffe layer has not been recoded with 
+any platform-specific optimization.
+
+\subsubsection{Coarse grain parallelization and optimizations}
+Algorithm \ref{alg-par-forw} shows a high level description of a 
+coarse grain parallelization of the forward layer transformation 
+described in section \ref{sec-caffe}. The parallelization is specified 
+with directive-based annotations following the OpenMP syntax and semantic. 
+Coarse parallelism is defined by a parallel region that englobes all the 
+layer code (lines 1-16). The original loop nest appears with a coalescing 
+transformation where some of the outermost loops have been fusioned in a 
+single loop statement (line 6). A parallelizing directive for this loop 
+is inserted (line 5) specifying the parallel execution of this loop 
+under a static loop scheduling (default scheduling for OpenMP). 
+The loop coalescing transformation is related to the parallelization 
+process and is done to have effective control of the work distribution 
+under a static loop scheduling. To understand this issue, recall the 
+code structure in Algorithm \ref{alg-forw}. In that version, the outermost 
+loop corresponds to the loop that processes every data sample in the 
+batch (loop with induction variable \emph{s}). In general, after the 
+parallelization under a static scheduling, one iteration is the minimal 
+work unit for work distribution. If that loop were paralellized, the 
+amount of work per iteration is coarse enough so that any difference 
+in the number of assigned iterations per thread can cause a significant  
+work unbalance. To maintain the coarse level parallelization, but minimize 
+the size of the work unit, the coalescing transformation increments the 
+total number of iterations, but having every iteration a smaller 
+amount of work. In general, the number of coalesced loops is layer 
+dependant. Some of the layers are parallelized with no coalescing, 
+other coalesce the whole loop nest. This optimization process was 
+manually performed.
+
+Algorithm \ref{alg-par-back} shows the coarse-grain parallelization of 
+the backward layer phase. For parallelism specification and work 
+distribution, the transformations are the same as in the previous 
+case for the layer forward phase. The same coalescing transformation has 
+been applied and paralellsim has been specified at the same levels. 
+The number of coalesced loops is layer dependant, and this optimization 
+has been manually performed. The main difference resides on the special 
+treatment for the gradient update (\emph{diffs-top} and \emph{diffs-bottom} 
+variables). Recall that the DNN training algorithm averages all gradients 
+computed within a batch. This happens during the layer backward phase.
+Now, this computation has been parallelized, so the gradient update has 
+to be implemented thorugh a reduction operation and thread mutual exclusion 
+mechanisms. In the algorithm, this corresponds to lines 18-20. An ordered loop 
+is added so that every thread incorporates its gradient computation to 
+the global variable that stores the gradients.
+This mechanism requires the per-thread privatization of the blob storing 
+the gradients. The private storage for the gradients has to be properly 
+initialized to the neuter value of the reduction operation, in the case 
+the zero value (lines 4-5 in the algorithm). 
+
+%\subsection{GPU-code vs CPU-code}
+%\todo{coalescing happens different. In gPU it happens fro the innermost loops. In CPU fro the outermost loops. GPU exploits finer grain,CPU coarser grain }
+%\todo{emphasis in recoding, CPU version does not need recoding. }
+
+%\todo{Caffe is already optimized to exploit the BLAS level parallelism with GPUs. 
+%For some layer types, the Blob level parallelism is
+%also exploited through the usage of GPU streams [REF]. The
+%batch level of parallelism is not currently supported and corresponds 
+%the target of this paper. Section XX describes the parallelization 
+%process for the exploitation of this level of parallelism.}
+
+%\begin{algorithm}
+%\caption{Fine-grain parallel layer forward phase}
+%\label{alg-fine-par-forw}
+%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+%\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+%\Output{Top blob for the layer transformation}
+%\BlankLine
+%\For{$s \leftarrow 1$ \KwTo $S$}{
+%\BlankLine
+%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
+    %\dots
+%\BlankLine
+    %\For{$d_k \leftarrow 1$ \KwTo $D_k$}{
+      %\For{$civ \leftarrow 1$ \KwTo $D_{\text{k+1}}$*$\dots$*$D_N$}{
+        %\BlankLine
+        %$d_{\text{k+1}}$ = $f_{\text{k+1}}$(civ);
+        %\BlankLine
+        %\dots
+        %\BlankLine
+        %$d_N$ = $f_N$(civ);
+        %\BlankLine
+          %top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+%}
+%}
+%}
+%}
+%\end{algorithm}
+
