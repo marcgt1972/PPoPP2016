@@ -3,12 +3,13 @@ results in domains like computer vision and speech recognition \cite{ILSVRC15, H
 One key and essential element for this success
 has been the introduction of high performance computing (HPC)
 techniques within one critical step in the network deployment: the
-network training. Neural networks require a training stage with
+network training. Neural networks require a training stage which has typically
 very high computational demands. Currently, the optimization of this stage
 has become the main bottleneck for a reasonable trade-off between the
 final network accuracy and the actual length of the
-training process [REF COTS, Downpour SGD and Sandblaster 
-L-BFGS]. 
+training process \cite{JeffDean2012, Coates2013} 
+% [Downpour SGD and Sandblaster L-BFGS]. 
+
 %In most recent and successful proposals, the training stage
 %takes about \todo{XXX hours} for a network with state-of-the-art 
 %accuracy [REFs]. Clearly, optimizing and accelerating this process are
@@ -19,23 +20,21 @@ along this process correspond to basic linear algebra operations. In
 general, an optimal training algorithm is built upon a very specific 
 data layout mainly composed of matrices and vectors, and an iterative
 procedure that invokes specialized and highly optimized basic
-linear algebra subroutines (BLAS). All of the most relevant and
-widely used DNN frameworks (e,g.: Caffe [REF], Theano [REF]
-or Torch [REF]) follow this approach. When it comes to optimization, 
-GPU acceleration has been the most spread strategy. GPUs have
+linear algebra subroutines (BLAS). All the widely used DNN frameworks (e,g.: Caffe \cite{Caffe}, Theano \cite{Theano}
+or Torch \cite{Torch}) follow this approach. When it comes to optimization, 
+GPU acceleration \cite{NVIDIA} has been the most spread widely adopted strategy and they have
 shown extraordinary performance levels. They are massively
 parallel architectures for very fine grain parallelism and BLAS
 computations make a perfect fit for them. But in terms of programmability,
 porting the original code to GPU kernels requires significant programming 
 efforts. The general solution has been to use specialized 
-libraries like cuBLAS and cuDNN [REF to cuBLAS,
-cuDNN]). Unfortunately, this approach lacks from generality.
+libraries like cuBLAS  \cite{cuBLAS} and cuDNN \cite{cuDNN}. Unfortunately, this approach lacks from generality.
 Along the research cycle for DNNs, the optimal network architecture,
 parameters and data layout are unknown. So, the specialized
 GPU libraries are not yet available. Even for the case of cuDNN,
-only DNN transformations that are very well undersotood and no 
+only DNN transformations that are very well understood and no 
 longer in a research stage (e.g.: convolution and pooling operations),
-are supported, and with a strong bias to computer vision.
+are supported, and has a strong bias towards computer vision applications.
 
 An unexplored strategy is a CPU parallelization at a coarser level.
 Neural networks are trained with batches of data where each batch
@@ -64,7 +63,7 @@ The solution has been to reduce the batch size and make it fit in memory.
 But this changes the batch size and alters the convergence. In general, 
 doubling the number of GPUs having halved the batch size is never a 
 guarantee of observing a 2x speedup for the training 
-process [Baidu deep speech]. We name this property as \textbf{convergence-invariant}.
+process \cite{Hannun2014}. We name this property as \textbf{convergence-invariant}.
 
 %would enable a multi-GPU execution
 %without changing any parameter of the training algorithm. This is
@@ -85,21 +84,21 @@ support of specialized and optimized libraries. Therefore, the
 optimization is immediately available for accelerating the DNN
 training. And it is compatible with multi-GPU execution without 
 altering the algorithm convergence rate. The parallelization has 
-been implemented in Caffe [REF], a state-of-the-art DNN framework. 
+been implemented in Caffe \cite{Caffe}, a state-of-the-art DNN framework. 
 The paper describes the code transformations for the parallelization 
-as well as we identify the limiting performance factors of the
+and we also identify the limiting performance factors of the
 approach and expose appropriate optimizations. We show competitive 
 performance results for two state-of-the-art computer vision
-datasets, MNIST and CIFAR-10. In particular, in a \todo{16-core Xeon XXXX 
+datasets, MNIST \cite{MNIST} and CIFAR-10 \cite{CIFAR10}. In particular, in a \todo{16-core Xeon XXXX 
 at XXHz we observe speedups of XXX, at similar performance levels 
-of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.}
+of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.\cite{K40}}
 
-The rest of this paper is organized as section 2, which 
+The rest of this paper is organized as Section 2, which 
 describes the main design aspects of Caffe regarding its 
 parallelization. Section 3 describes the code transformations 
 and optimizations for a batch-level parallelization of the 
 training core of Caffe. Section 4 analyses the performance 
 limiting factors of the approach and its overall performance. 
-Section 5 presents the related work and finally section 6 
+Section 5 presents the related work and finally Section 6 
 concludes the paper with its main conclusions.
 

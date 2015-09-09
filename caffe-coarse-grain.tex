@@ -15,7 +15,7 @@ network exposes several levels and types of parallelism.
 This level of parallelism corresponds to the computations that 
 are based on basic linear algebra. It appears in the 
 BLAS computations applied in each data segment in the input/output blobs.
-In algortihms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line 
+In algorithms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line 
 6 in both cases hide this level of parallelism.
 
 In general, these computations correspond to matrix and
@@ -34,9 +34,9 @@ perform BLAS calls for each segment. This parallelism can be
 exploited with thread level parallelism as each BLAS call can be
 executed in parallel.
 
-In general, the dimensions of the input blob are layer dependant. Therefore the number of iterations in each loop level is also layer dependant. All loops are 
+In general, the dimensions of the input blob are layer dependent. Therefore the number of iterations in each loop level is also layer dependent. All loops are 
 interchangeable and parallel, given the appropriate data privatizations. 
-So, in order to have control of the most apprapriate loop scheduling, 
+So, in order to have control of the most appropriate loop scheduling, 
 loops can be rearranged in different manners. 
 
 \subsubsection{Batch Level Parallelism}
@@ -221,7 +221,7 @@ parallelize Caffe so that these principles are kept. We have
 adopted restrictions for the code reorganization and optimization.
 To indicate the parallelism to be exploited, only directive-based 
 transformations have been applied. We have used OpenMP directives 
-to indicate which loops have to be paralellized. When ever possible, 
+to indicate which loops have to be parallelized. When ever possible, 
 we have used the OpenMP primitives to indicate data privatizations 
 and reduction operations, as well as the necessary synchronization 
 points along the parallel code. To increase performance, we have 
@@ -241,7 +241,7 @@ layer code (lines 1-16). The original loop nest appears with a coalescing
 transformation where some of the outermost loops have been fusioned in a 
 single loop statement (line 6). A parallelizing directive for this loop 
 is inserted (line 5) specifying the parallel execution of this loop 
-under a static loop scheduling (default scheduling for OpenMP). 
+under a static loop scheduling (default scheduling for OpenMP \cite{Open-MP}). 
 The loop coalescing transformation is related to the parallelization 
 process and is done to have effective control of the work distribution 
 under a static loop scheduling. To understand this issue, recall the 
@@ -249,7 +249,7 @@ code structure in Algorithm \ref{alg-forw}. In that version, the outermost
 loop corresponds to the loop that processes every data sample in the 
 batch (loop with induction variable \emph{s}). In general, after the 
 parallelization under a static scheduling, one iteration is the minimal 
-work unit for work distribution. If that loop were paralellized, the 
+work unit for work distribution. If that loop were parallelized, the 
 amount of work per iteration is coarse enough so that any difference 
 in the number of assigned iterations per thread can cause a significant  
 work unbalance. To maintain the coarse level parallelization, but minimize 
@@ -264,14 +264,14 @@ Algorithm \ref{alg-par-back} shows the coarse-grain parallelization of
 the backward layer phase. For parallelism specification and work 
 distribution, the transformations are the same as in the previous 
 case for the layer forward phase. The same coalescing transformation has 
-been applied and paralellsim has been specified at the same levels. 
-The number of coalesced loops is layer dependant, and this optimization 
+been applied and parallelism has been specified at the same levels. 
+The number of coalesced loops is layer dependent, and this optimization 
 has been manually performed. The main difference resides on the special 
 treatment for the gradient update (\emph{diffs-top} and \emph{diffs-bottom} 
 variables). Recall that the DNN training algorithm averages all gradients 
 computed within a batch. This happens during the layer backward phase.
 Now, this computation has been parallelized, so the gradient update has 
-to be implemented thorugh a reduction operation and thread mutual exclusion 
+to be implemented through a reduction operation and thread mutual exclusion 
 mechanisms. In the algorithm, this corresponds to lines 18-20. An ordered loop 
 is added so that every thread incorporates its gradient computation to 
 the global variable that stores the gradients.

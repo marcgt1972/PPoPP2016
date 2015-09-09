@@ -1,16 +1,16 @@
 Caffe is a deep learning framework for research in deep neural
-networks. Up today it is widely used across the DNN community
-and has become one main platform for neural network development. 
-Two main reasons justify this. First, it currently supports
+networks. It is widely used across the DNN community
+and has become one main platform for neural network algorithm development. 
+Two main reasons justify this. Firstly, Caffe supports
 many network architectures and main training algorithms for
-neural networks. Second, Caffe is optimized with GPU acceleration.
+neural networks. Secondly, Caffe is optimized with GPU acceleration.
 This section describes the main operational aspects of Caffe
 regarding its parallelization. 
 %It is not a functional description of the framework and its capabilities for the design of neural networks. 
 The main focus of this section is to describe the neural network 
 training algorithm in terms of how the computations happen across 
-the network, how the data flow across these computations 
-and the different types and levels of parallelism that exist.
+the network, how the data flow across these layers 
+and the different types and levels of parallelism that exist within each layer.
 
 \begin{figure}[]
 \centering
@@ -26,12 +26,16 @@ and the different types and levels of parallelism that exist.
 \end{figure}
 
 \subsection{Neural Networks in Caffe}
-Caffe processes a neural network specification in the form of a set
-of stacked network layers. Network layers are stacked
-so that the output of one layer becomes the input of the immediate
-one in the stack. The first layer processes the input of the neural
+Caffe allows an user to specify the network structure in a prototext format which can capture any kind of DAG (directed acyclic graph).
+Caffe framework allows users to define Layers and each layer has a pre-defined interface. Hence as users compose a network of Layers
+it becomes very easily to define extremely complicated graphs in a compact notation. 
+Caffe also allows users to specify all the solver parameters as part of a Solver file. The solver file can capture different solver types 
+for. e.g. SGD, ADAGRAD, NESTOROV. 
+
+A network (Net) in Caffe comprises of a set of layers. Each layers are stacked
+such that the output of one layer becomes the input to the next immediate layer in the stack. The first layer processes the input (Data) of the neural
 network. Each of the subsequent layers apply a data transformation 
-according to specific layer coefficients. The output of Caffe is the 
+according to each specific layer coefficients. The output of Caffe is the 
 set of the coefficients in each layer after the network training process is
 completed. Regarding the parallelization of the training process, the
 main aspects to consider are how the input/output data flow across
@@ -40,7 +44,7 @@ training algorithm itself.
 
 \subsubsection{Input-Output Data}
 The data structure that implements the communication between
-network layers is the \emph{blob}. A blob is an n-dimensional matrix with
+network layers is the \emph{Blob}. A Blob is an n-dimensional matrix with
 dimensions defined according to layer parameters. For example, if
 a network is trained as an image classifier, the input data (e.g:
 several images) would be organized as a 4-dimensional blob. The
