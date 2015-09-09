@@ -1,2 +1,2 @@
-# ParallelCaffe
-Proposed paper for parallel caffe
+# Draft paper for PPoPP2016
+
