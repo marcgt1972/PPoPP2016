@@ -1,9 +1,9 @@
 This section describes the parallelization process for a coarse-grain 
-parallelization of the Caffe DNN framework. First, we identify the 
+parallelization in the Caffe DNN framework. First, we identify the 
 different sources of parallelism and their granularity. Second, we 
 describe the methodology to generate a coarse-grain parallelism version 
-of the algorithms exposed previously in section \ref{sec-caffe}. Finally, 
-we compare this approach to that of a fine-grain parallelization 
+of the algorithms discussed previously in section \ref{sec-caffe}. Finally, 
+we compare our approach to that of a fine-grain parallelization 
 corresponding to the GPU version.
 
 \subsection{Sources of Parallelism}
@@ -13,16 +13,15 @@ network exposes several levels and types of parallelism.
 
 \subsubsection{BLAS Level Parallelism}
 This level of parallelism corresponds to the computations that 
-are based on basic linear algebra. It appears in the 
-BLAS computations applied in each data segment in the input/output blobs.
+are based on basic linear algebra operations. It appears in the 
+BLAS computations executed for each data segment in the input/output blobs.
 In algorithms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line 
 6 in both cases hide this level of parallelism.
 
 In general, these computations correspond to matrix and
-vector operations like matrix-x-matrix and the matrix-x-vector
+vector operations like matrix-$\times$-vector and matrix-$\times$-matrix
 products. Caffe includes a native and limited BLAS implementation that 
-can be substituted with specialized libraries like Atlas
-[REF], OpenBLAS [REF] or Intel MKL [REF]. These implementations are 
+can be substituted with specialized libraries like Atlas \cite{Atlas}, OpenBLAS \cite{OpenBLAS} or Intel MKL \cite{MKL}. These implementations are 
 highly optimized and exploit both thread level parallelism and SIMD level parallelism with vectorized code.
 
 \subsubsection{Blob Level Parallelism}
@@ -30,8 +29,8 @@ This level of parallelism corresponds to the nested loops in the forward
 and backward phases in lines 2 and 5 in algorithms 
 \ref{alg-forw} and \ref{alg-back}. 
 These loops traverse the data segments in the input and output blobs and
-perform BLAS calls for each segment. This parallelism can be
-exploited with thread level parallelism as each BLAS call can be
+perform BLAS calls for each segment. This kind of parallelism can be
+achieved with thread level parallelism as each BLAS call can be
 executed in parallel.
 
 In general, the dimensions of the input blob are layer dependent. Therefore the number of iterations in each loop level is also layer dependent. All loops are 
@@ -135,9 +134,9 @@ gradients.
 \BlankLine
 \emph{/* Object Privatization */}
 \BlankLine
-Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
+Blob private-diffs\_bottom(M, $O_1, O_2$, $\dots$, $O_M$);
 \BlankLine
-caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs-bottom);
+caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
 \BlankLine
 \dots
 \BlankLine
@@ -160,7 +159,7 @@ caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs-bottom);
     \dots
     \BlankLine
     \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+      private-diffs\_bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs\_top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
 }
 }
 }
@@ -213,15 +212,15 @@ caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs-bottom);
 
 
 \subsection{Code Transformations}
-Caffe follows an object-oriented design and C++ implementation. 
+The Caffe framework is designed using object-oriented methodologies and uses a C++ implementation. 
 Its main data structures and algorithms have been designed with 
 functional principles with the aim of giving support for neural network 
 development. In this paper, we have followed a methodology to 
-parallelize Caffe so that these principles are kept. We have 
-adopted restrictions for the code reorganization and optimization.
+parallelize Caffe so that these principles are kept intact. We wanted to minimize 
+code reorganization for the optimization process.
 To indicate the parallelism to be exploited, only directive-based 
-transformations have been applied. We have used OpenMP directives 
-to indicate which loops have to be parallelized. When ever possible, 
+transformations have been applied. We have used OpenMP \cite{Open-MP} directives 
+to indicate which loops have to be parallelized. Whenever possible, 
 we have used the OpenMP primitives to indicate data privatizations 
 and reduction operations, as well as the necessary synchronization 
 points along the parallel code. To increase performance, we have 
@@ -235,10 +234,10 @@ any platform-specific optimization.
 Algorithm \ref{alg-par-forw} shows a high level description of a 
 coarse grain parallelization of the forward layer transformation 
 described in section \ref{sec-caffe}. The parallelization is specified 
-with directive-based annotations following the OpenMP syntax and semantic. 
+with directive-based annotations following the OpenMP syntax and semantics. 
 Coarse parallelism is defined by a parallel region that englobes all the 
 layer code (lines 1-16). The original loop nest appears with a coalescing 
-transformation where some of the outermost loops have been fusioned in a 
+transformation where some of the outermost loops have been collapsed into a 
 single loop statement (line 6). A parallelizing directive for this loop 
 is inserted (line 5) specifying the parallel execution of this loop 
 under a static loop scheduling (default scheduling for OpenMP \cite{Open-MP}). 
@@ -247,7 +246,7 @@ process and is done to have effective control of the work distribution
 under a static loop scheduling. To understand this issue, recall the 
 code structure in Algorithm \ref{alg-forw}. In that version, the outermost 
 loop corresponds to the loop that processes every data sample in the 
-batch (loop with induction variable \emph{s}). In general, after the 
+batch (loop with variable \emph{s}). In general, after the 
 parallelization under a static scheduling, one iteration is the minimal 
 work unit for work distribution. If that loop were parallelized, the 
 amount of work per iteration is coarse enough so that any difference 
@@ -256,18 +255,18 @@ work unbalance. To maintain the coarse level parallelization, but minimize
 the size of the work unit, the coalescing transformation increments the 
 total number of iterations, but having every iteration a smaller 
 amount of work. In general, the number of coalesced loops is layer 
-dependant. Some of the layers are parallelized with no coalescing, 
+dependent. Some of the layers are parallelized with no coalescing, 
 other coalesce the whole loop nest. This optimization process was 
 manually performed.
 
 Algorithm \ref{alg-par-back} shows the coarse-grain parallelization of 
-the backward layer phase. For parallelism specification and work 
+the backward layer pass. For parallelism specification and work 
 distribution, the transformations are the same as in the previous 
-case for the layer forward phase. The same coalescing transformation has 
+case for the layer forward pass. The same coalescing transformation has 
 been applied and parallelism has been specified at the same levels. 
 The number of coalesced loops is layer dependent, and this optimization 
 has been manually performed. The main difference resides on the special 
-treatment for the gradient update (\emph{diffs-top} and \emph{diffs-bottom} 
+treatment for the gradient update (\emph{diffs\_top} and \emph{diffs\_bottom} 
 variables). Recall that the DNN training algorithm averages all gradients 
 computed within a batch. This happens during the layer backward phase.
 Now, this computation has been parallelized, so the gradient update has 
@@ -277,7 +276,7 @@ is added so that every thread incorporates its gradient computation to
 the global variable that stores the gradients.
 This mechanism requires the per-thread privatization of the blob storing 
 the gradients. The private storage for the gradients has to be properly 
-initialized to the neuter value of the reduction operation, in the case 
+initialized to the neutral value of the reduction operation, in the case 
 the zero value (lines 4-5 in the algorithm). 
 
 %\subsection{GPU-code vs CPU-code}

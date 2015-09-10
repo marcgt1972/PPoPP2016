@@ -6,17 +6,18 @@
   year={2012}
 }
 
-@proceedings{Coates2013,
-  title     = {Proceedings of the 30th International Conference on Machine Learning,
+@inproceedings{Coates2013,
+  author    = {Adam Coates and
+               Brody Huval and
+               Tao Wang and
+               David J. Wu and
+               Bryan C. Catanzaro and
+               Andrew Y. Ng},
+  title     = {Deep learning with {COTS} {HPC} systems},
+  booktitle = {Proceedings of the 30th International Conference on Machine Learning,
                {ICML} 2013, Atlanta, GA, USA, 16-21 June 2013},
-  series    = {{JMLR} Proceedings},
-  volume    = {28},
-  publisher = {JMLR.org},
+  pages     = {1337--1345},
   year      = {2013},
-  url       = {http://jmlr.org/proceedings/papers/v28/},
-  timestamp = {Thu, 11 Sep 2014 07:28:55 +0200},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/icml/2013},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 @article{Hannun2014,
@@ -42,11 +43,140 @@
 }
 
 @article{ILSVRC15,
-Author = {Olga Russakovsky and Jia Deng and Hao Su and Jonathan Krause and Sanjeev Satheesh and Sean Ma and Zhiheng Huang and Andrej Karpathy and Aditya Khosla and Michael Bernstein and Alexander C. Berg and Li Fei-Fei},
-Title = {{ImageNet Large Scale Visual Recognition Challenge}},
-Year = {2015},
-journal   = {International Journal of Computer Vision (IJCV)},
-doi = {10.1007/s11263-015-0816-y},
-pages={1-42},
-month={April}
+  Author = {Olga Russakovsky and Jia Deng and Hao Su and Jonathan Krause and Sanjeev Satheesh and Sean Ma and Zhiheng Huang and Andrej Karpathy and Aditya Khosla and Michael Bernstein and Alexander C. Berg and Li Fei-Fei},
+  Title = {{ImageNet Large Scale Visual Recognition Challenge}},
+  Year = {2015},
+  journal   = {International Journal of Computer Vision (IJCV)},
+  doi = {10.1007/s11263-015-0816-y},
+  pages={1-42},
+  month={April}
+}
+
+@ARTICLE{Deng2012, 
+  author={Li Deng}, 
+  journal={Signal Processing Magazine, IEEE}, 
+  title={{The MNIST Database of Handwritten Digit Images for Machine Learning Research [Best of the Web]}}, 
+  year={2012}, 
+  volume={29}, 
+  number={6}, 
+  pages={141-142}, 
+  doi={10.1109/MSP.2012.2211477}, 
+  ISSN={1053-5888}, 
+  month={Nov}
+}
+
+@article{LeNet,
+  Author = {Yann Lecun and Leon Bottou and Yoshua Bengio and Patrick Haffner},
+  Title = {{Gradient Based Learning Applied to Document Recognition}},
+  Year = {2001},
+  journal   = {IEEE Press},
+  pages={306-351}
+}
+
+@article{CNN,
+  Author = {Alex Krizhevsky and Ilya Sutskever and Geoffrey E. Hinton},
+  Title = {ImageNet Classification with Deep Convolutional Neural Networks},
+  Year = {2012},
+  journal = {Advances in Neural Information Processing Systems 25},
+  pages = {1097-1105}
+}
+
+
+@misc{MNIST,
+  author = {Yann LeCun and Corinna Cortes and Christopher Burges},
+  title = {THE MNIST DATABASE of handwritten digits},
+  year = {2015},
+  howpublished = { \url{http://yann.lecun.com/exdb/mnist/} }
+}
+
+@TECHREPORT{CIFAR10,
+    author = {Alex Krizhevsky},
+    title = {Learning multiple layers of features from tiny images},
+    institution = {University of Toronto},
+    url = {http://www.cs.toronto.edu/~kriz/cifar.html},
+    year = {2009}
+}
+
+@misc{protocol-buffer,
+  author = {Google},
+  title = {Protocol Buffers},
+  year = {2015},
+  howpublished = { \url{https://developers.google.com/protocol-buffers/} }
+}
+
+@article{Caffe,
+  Author = {Jia, Yangqing and Shelhamer, Evan and Donahue, Jeff and Karayev, Sergey and Long, Jonathan and Girshick, Ross and Guadarrama, Sergio and Darrell, Trevor},
+  Journal = {arXiv preprint arXiv:1408.5093},
+  Title = {Caffe: Convolutional Architecture for Fast Feature Embedding},
+  Year = {2014}
+}
+
+@misc{cuDNN,
+  author = {NVidia},
+  title = { {NVIDIA cuDNN - GPU Accelerated Deep Learning} },
+  year = {2015},
+  howpublished = { \url{https://developer.nvidia.com/cudnn} }
+}
+
+@MISC{Theano,
+  author = {Bastien, Fr{\'{e}}d{\'{e}}ric and Lamblin, Pascal and Pascanu, Razvan and Bergstra, James and Goodfellow, Ian J. and Bergeron, Arnaud and Bouchard, Nicolas and Bengio, Yoshua},
+  title = {Theano: new features and speed improvements},
+  year = {2012},
+  howpublished = {Deep Learning and Unsupervised Feature Learning NIPS 2012 Workshop},
+}
+
+@misc{torch7,
+  title = {Torch},
+  year = {2015},
+  howpublished = { \url{http://torch.ch/} }
+}
+
+@INPROCEEDINGS {Torch,
+title = {Torch7: A Matlab-like Environment for Machine Learning},
+author = {Collobert, Ronan and Kavukcuoglu, Koray and Farabet, Cl{\'{e}}ment},
+booktitle = {BigLearn, NIPS Workshop},
+year = {2011},
+url = {https://publidiap.idiap.ch/downloads//papers/2011/Collobert_NIPSWORKSHOP_2011.pdf},
+}
+
+@MISC{cuBLAS,
+  author = {NVidia},
+  title = { {cuBLAS}},
+  year = {2015},
+  howpublished = { \url{https://developer.nvidia.com/cuBLAS} }
+}
+
+@misc{Open-MP,
+  author = {Open-MP},
+  title = {OpenMP API Specification for Parallel Programming},
+  year = {2015},
+  howpublished = { \url{https://openmp.org/wp/} }
+}
+
+@misc{Atlas,
+  author = {Atlas},
+  title = {Automatically Tuned Linear Algebra Software (ATLAS)},
+  year = {2015},
+  howpublished = { \url{http://math-atlas.sourceforge.net/devel/} }
+}
+
+@misc{BLAS,
+  author = {Netlib},
+  title = {BLAS (Basic Linear Algebra Subprograms)},
+  year = {2015},
+  howpublished = { \url{https://www.netlib.org/blas/} }
+}
+
+@misc{OpenBLAS,
+  author = {OpenBLAS},
+  title = {OpenBLAS An Optimized BLAS Library},
+  year = {2015},
+  howpublished = { \url{https://www.openblas.net} }
+}
+
+@misc{MKL,
+  author = {Intel},
+  title = {Intel Math Kernel Library},
+  year = {2015},
+  howpublished = { \url{https://software.intel.com/en-us/intel-mkl} }
 }

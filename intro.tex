@@ -1,10 +1,12 @@
-Deep neural networks (DNN) have recently achieved extraordinary 
+Recently, deep neural networks (DNN) have achieved extraordinary 
 results in domains like computer vision and speech recognition \cite{ILSVRC15, Hannun2014}. 
 One key and essential element for this success
 has been the introduction of high performance computing (HPC)
 techniques within one critical step in the network deployment: the
-network training. Neural networks require a training stage which has typically
-very high computational demands. Currently, the optimization of this stage
+network training. 
+Neural networks require a training stage which typically has
+very high computational demands. 
+Currently, the optimization of this stage
 has become the main bottleneck for a reasonable trade-off between the
 final network accuracy and the actual length of the
 training process \cite{JeffDean2012, Coates2013} 
@@ -15,25 +17,33 @@ training process \cite{JeffDean2012, Coates2013}
 %accuracy [REFs]. Clearly, optimizing and accelerating this process are
 %key priorities in the DNN domain.
 
-During the training process, a gradient descent algorithm minimizes a pre-defined cost function [REF]. Most computations
+During the training process, a gradient descent algorithm minimizes a pre-defined cost function. 
+Most computations
 along this process correspond to basic linear algebra operations. In
 general, an optimal training algorithm is built upon a very specific 
 data layout mainly composed of matrices and vectors, and an iterative
 procedure that invokes specialized and highly optimized basic
-linear algebra subroutines (BLAS). All the widely used DNN frameworks (e,g.: Caffe \cite{Caffe}, Theano \cite{Theano}
-or Torch \cite{Torch}) follow this approach. When it comes to optimization, 
-GPU acceleration \cite{NVIDIA} has been the most spread widely adopted strategy and they have
-shown extraordinary performance levels. They are massively
+linear algebra subroutines (BLAS).
+All the widely used DNN frameworks (e,g.: Caffe \cite{Caffe}, Theano \cite{Theano} or Torch \cite{Torch}) follow this approach. 
+When it comes to optimization, 
+GPU acceleration has been the most widespread adopted strategy and they have
+shown extraordinary performance levels. 
+GPU's are massively
 parallel architectures for very fine grain parallelism and BLAS
-computations make a perfect fit for them. But in terms of programmability,
+computations make a perfect fit for them. 
+But in terms of programmability,
 porting the original code to GPU kernels requires significant programming 
-efforts. The general solution has been to use specialized 
-libraries like cuBLAS  \cite{cuBLAS} and cuDNN \cite{cuDNN}. Unfortunately, this approach lacks from generality.
-Along the research cycle for DNNs, the optimal network architecture,
-parameters and data layout are unknown. So, the specialized
-GPU libraries are not yet available. Even for the case of cuDNN,
-only DNN transformations that are very well understood and no 
-longer in a research stage (e.g.: convolution and pooling operations),
+efforts. 
+The general solution has been to use specialized 
+libraries like cuBLAS  \cite{cuBLAS} and cuDNN \cite{cuDNN}. 
+Unfortunately, this approach lacks from generality.
+During the research cycle to create a DNN, the optimal network topology,
+parameters and data layout are unknown. 
+So, the specialized GPU libraries are not yet useful. 
+Even for the case of cuDNN, 
+only DNN transformations that are very well understood 
+% and no longer in a research stage 
+(e.g.: convolution and pooling operations),
 are supported, and has a strong bias towards computer vision applications.
 
 An unexplored strategy is a CPU parallelization at a coarser level.
@@ -44,10 +54,11 @@ the batch can be processed in parallel. This defines a much coarser
 thread level parallelism but adds complexity to the
 parallelization process: thread level parallelism has to be explicitly 
 introduced and race conditions appear for the network coefficient 
-update. This has made this option not fully explored by the
-DNN community although its potential is very significant. 
+update. 
+%This has made this option not fully explored by the
+%DNN community although its potential is very significant. 
 The batch-level parallelism is inherent to the gradient descent 
-algorithm and produces immediate acceleration no matter the 
+algorithm and produces immediate acceleration irrespective of the 
 nature of the network computations. It does not rely on a 
 particular optimal data layout nor the availability of any specialized 
 and highly optimized library for the network layers. So, its 
@@ -89,9 +100,11 @@ The paper describes the code transformations for the parallelization
 and we also identify the limiting performance factors of the
 approach and expose appropriate optimizations. We show competitive 
 performance results for two state-of-the-art computer vision
-datasets, MNIST \cite{MNIST} and CIFAR-10 \cite{CIFAR10}. In particular, in a \todo{16-core Xeon XXXX 
+datasets, MNIST \cite{MNIST,Deng2012} and CIFAR-10 \cite{CIFAR10}. 
+%
+In particular, in a \todo{16-core Xeon XXXX 
 at XXHz we observe speedups of XXX, at similar performance levels 
-of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.\cite{K40}}
+of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.}
 
 The rest of this paper is organized as Section 2, which 
 describes the main design aspects of Caffe regarding its 
