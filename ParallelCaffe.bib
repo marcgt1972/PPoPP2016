@@ -6,17 +6,18 @@
   year={2012}
 }
 
-@proceedings{Coates2013,
-  title     = {Proceedings of the 30th International Conference on Machine Learning,
+@inproceedings{Coates2013,
+  author    = {Adam Coates and
+               Brody Huval and
+               Tao Wang and
+               David J. Wu and
+               Bryan C. Catanzaro and
+               Andrew Y. Ng},
+  title     = {Deep learning with {COTS} {HPC} systems},
+  booktitle = {Proceedings of the 30th International Conference on Machine Learning,
                {ICML} 2013, Atlanta, GA, USA, 16-21 June 2013},
-  series    = {{JMLR} Proceedings},
-  volume    = {28},
-  publisher = {JMLR.org},
+  pages     = {1337--1345},
   year      = {2013},
-  url       = {http://jmlr.org/proceedings/papers/v28/},
-  timestamp = {Thu, 11 Sep 2014 07:28:55 +0200},
-  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/icml/2013},
-  bibsource = {dblp computer science bibliography, http://dblp.org}
 }
 
 @article{Hannun2014,
@@ -42,48 +43,47 @@
 }
 
 @article{ILSVRC15,
-Author = {Olga Russakovsky and Jia Deng and Hao Su and Jonathan Krause and Sanjeev Satheesh and Sean Ma and Zhiheng Huang and Andrej Karpathy and Aditya Khosla and Michael Bernstein and Alexander C. Berg and Li Fei-Fei},
-Title = {{ImageNet Large Scale Visual Recognition Challenge}},
-Year = {2015},
-journal   = {International Journal of Computer Vision (IJCV)},
-doi = {10.1007/s11263-015-0816-y},
-pages={1-42},
-month={April}
+  Author = {Olga Russakovsky and Jia Deng and Hao Su and Jonathan Krause and Sanjeev Satheesh and Sean Ma and Zhiheng Huang and Andrej Karpathy and Aditya Khosla and Michael Bernstein and Alexander C. Berg and Li Fei-Fei},
+  Title = {{ImageNet Large Scale Visual Recognition Challenge}},
+  Year = {2015},
+  journal   = {International Journal of Computer Vision (IJCV)},
+  doi = {10.1007/s11263-015-0816-y},
+  pages={1-42},
+  month={April}
 }
 
-@Article {Deng2012,
-author       = {Li Deng},
-journal      = {IEEE Signal Processing Magazine},
-month        = {November},
-number       = {141-142},
-title        = {The MNIST database of handwritten digit images for machine learning research},
-url          = {http://research.microsoft.com/apps/pubs/default.aspx?id=204699},
-year         = {2012},
+@ARTICLE{Deng2012, 
+  author={Li Deng}, 
+  journal={Signal Processing Magazine, IEEE}, 
+  title={{The MNIST Database of Handwritten Digit Images for Machine Learning Research [Best of the Web]}}, 
+  year={2012}, 
+  volume={29}, 
+  number={6}, 
+  pages={141-142}, 
+  doi={10.1109/MSP.2012.2211477}, 
+  ISSN={1053-5888}, 
+  month={Nov}
 }
 
 @misc{MNIST,
   author = {Yann LeCun and Corinna Cortes and Christopher Burges},
   title = {THE MNIST DATABASE of handwritten digits},
+  year = {2015},
   howpublished = { \url{http://yann.lecun.com/exdb/mnist/} }
 }
 
-@TECHREPORT{Krizhevsky2009,
+@TECHREPORT{CIFAR10,
     author = {Alex Krizhevsky},
     title = {Learning multiple layers of features from tiny images},
     institution = {University of Toronto},
-    year = {2009}
-}
-
-@misc{CIFAR10,
-    author = {Alex Krizhevsky},
-    title = {Learning multiple layers of features from tiny images},
-    howpublished = { \url{http://www.cs.toronto.edu/~kriz/cifar.html} }
+    url = {http://www.cs.toronto.edu/~kriz/cifar.html},
     year = {2009}
 }
 
 @misc{protocol-buffer,
   author = {Google},
   title = {Protocol Buffers},
+  year = {2015},
   howpublished = { \url{https://developers.google.com/protocol-buffers/} }
 }
 
@@ -97,18 +97,20 @@ year         = {2012},
 @misc{cuDNN,
   author = {NVidia},
   title = { {NVIDIA cuDNN - GPU Accelerated Deep Learning} },
+  year = {2015},
   howpublished = { \url{https://developer.nvidia.com/cudnn} }
 }
 
 @MISC{Theano,
-        author = {Bastien, Fr{\'{e}}d{\'{e}}ric and Lamblin, Pascal and Pascanu, Razvan and Bergstra, James and Goodfellow, Ian J. and Bergeron, Arnaud and Bouchard, Nicolas and Bengio, Yoshua},
-         title = {Theano: new features and speed improvements},
-          year = {2012},
+  author = {Bastien, Fr{\'{e}}d{\'{e}}ric and Lamblin, Pascal and Pascanu, Razvan and Bergstra, James and Goodfellow, Ian J. and Bergeron, Arnaud and Bouchard, Nicolas and Bengio, Yoshua},
+  title = {Theano: new features and speed improvements},
+  year = {2012},
   howpublished = {Deep Learning and Unsupervised Feature Learning NIPS 2012 Workshop},
 }
 
 @misc{torch7,
   title = {Torch},
+  year = {2015},
   howpublished = { \url{http://torch.ch/} }
 }
 
@@ -121,8 +123,8 @@ url = {https://publidiap.idiap.ch/downloads//papers/2011/Collobert_NIPSWORKSHOP_
 }
 
 @MISC{cuBLAS,
-    author = {NVidia},
-    title = { {cuBLAS}},
+  author = {NVidia},
+  title = { {cuBLAS}},
+  year = {2015},
   howpublished = { \url{https://developer.nvidia.com/cuBLAS} }
-
 }
