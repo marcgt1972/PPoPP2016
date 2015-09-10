@@ -84,7 +84,7 @@ in the blobs. In this case, 9 data segments in the input blob are
 used to compute a one segment in the output blob. 
 
 In general, such transformations are implemented using basic algebra 
-operations like matrix-x-vector or matrix-x-matrix products and are often referred to as Level 2/3 BLAS operations \cite{BLAS}. 
+operations like matrix-$\times$-vector or matrix-$\times$-matrix products and are often referred to as Level 2/3 BLAS operations \cite{BLAS}. 
 A layer can be understood as a procedure based on several functions in the 
 form of f$_i$(x, W$_i$, b$_i$) = W$_i$x + b$_i$. The layer coefficients 
 would correspond to the matrices W$_i$ and vectors b$_i$. Input x would 
@@ -258,14 +258,14 @@ blobs that store the gradient computation (\emph{diffs\_bottom} and
 
 \subsection{Network Examples: MNIST and CIFAR-10}
 The MNIST \cite{Deng2012, MNIST} and CIFAR-10 \cite{CIFAR10} datasets are standard datasets for 
-computer vision. The MNIST dataset is composed of 60,000 images, each of dimension 28x28 pixels 
+computer vision. The MNIST dataset is composed of 60,000 images, each of dimension 28$\times$28 pixels 
 of handwritten digits for training and 10,000 test examples. 
 The Caffe distribution includes the LeNet \cite{LeNet} network for generating an image 
 classifier for this dataset. Given an a handwritten digit, 
 the network outputs which digit is represented (e.g.: 0 \dots 9). 
-The CIFAR-10 is a CNN (Convolution Neural network) included in the Caffe distribution
+The CIFAR-10 is a CNN (Convolution Neural network) \cite{CNN} included in the Caffe distribution
 that performs as an image classifier for the CIFAR dataset. CIFAR is 
-composed of 60,000 32x32 color images with 10 classes: 
+composed of 60,000 32$\times$32 color images with 10 classes: 
 \emph{airplane, automobile, bird, cat, deer, dog, frog, horse, ship, 
 truck} with 6000 images per class. Both the networks are built with  
 a subset of the available layers within Caffe. 
