@@ -2,7 +2,7 @@ Caffe is a deep learning framework for research in deep neural
 networks. It is widely used across the DNN community
 and has become one main platform for neural network algorithm development. 
 Two main reasons justify this. Firstly, Caffe supports
-many network architectures and main training algorithms for
+many network architectures and different training algorithms for
 neural networks. Secondly, Caffe is optimized with GPU acceleration.
 This section describes the main operational aspects of Caffe
 regarding its parallelization. 
@@ -26,16 +26,18 @@ and the different types and levels of parallelism that exist within each layer.
 \end{figure}
 
 \subsection{Neural Networks in Caffe}
-Caffe allows an user to specify the network structure in a prototext format which can capture any kind of DAG (directed acyclic graph).
-Caffe framework allows users to define Layers and each layer has a pre-defined interface. Hence as users compose a network of Layers
-it becomes very easily to define extremely complicated graphs in a compact notation. 
-Caffe also allows users to specify all the solver parameters as part of a Solver file. The solver file can capture different solver types 
-for. e.g. SGD, ADAGRAD, NESTOROV. 
+Caffe allows an user to specify the network structure in a prototext format \cite{protocol-buffer} 
+that can capture any kind of arbitrary DAG (directed acyclic graph).
+Caffe framework allows users to define their own \emph{Layers} and each layer has a pre-defined generic interface. 
+Hence as users compose a network of these Layers it becomes very easily to define extremely complicated graphs in a very compact notation. 
+Caffe also allows users to specify all the solver parameters as part of a \emph{Solver} file that is used for the optimization process. 
+The optimization process uses back propagation and implements several algorithms such as SGD, ADAGRAD, NESTEROV. 
 
-A network (Net) in Caffe comprises of a set of layers. Each layers are stacked
-such that the output of one layer becomes the input to the next immediate layer in the stack. The first layer processes the input (Data) of the neural
+A network (Net) in Caffe comprises of a set of layers. In a feed-forward network each layer is stacked
+such that the output of one layer becomes the input to the next immediate layer in the network graph. 
+The first layer processes the input (Data) that is fed to the neural
 network. Each of the subsequent layers apply a data transformation 
-according to each specific layer coefficients. The output of Caffe is the 
+according to each specific layers computation. The output of Caffe is the 
 set of the coefficients in each layer after the network training process is
 completed. Regarding the parallelization of the training process, the
 main aspects to consider are how the input/output data flow across
@@ -43,71 +45,73 @@ the network, the structure of the computation in each layer and the
 training algorithm itself.
 
 \subsubsection{Input-Output Data}
-The data structure that implements the communication between
-network layers is the \emph{Blob}. A Blob is an n-dimensional matrix with
-dimensions defined according to layer parameters. For example, if
-a network is trained as an image classifier, the input data (e.g:
-several images) would be organized as a 4-dimensional blob. The
-first dimension would correspond to the image index and the other
-three would indicate the number of channels (e.g.: 3 for an RGB
-coding) and the image dimensions (height and width). Figure \ref{fig-blob}
-shows an example of such input blob. For this case, the blob 
+Caffe stores and communicates data using blobs. \emph{Blobs} provide a unified memory interface 
+holding data; e.g., batches of images, model parameters, and derivatives for optimization.
+%The data structure that implements the communication between network layers is the \emph{Blob}. 
+Mathematically a Blob is an N-dimensional array stored in a C-contiguous fashion. 
+Blobs also conceal the computational and overhead of mixed CPU/GPU operation by synchronizing 
+from the CPU host to the GPU device as needed. 
+The conventional blob dimensions for batches of image data are number N x channel K x height H x width W. 
+For example, if a network is trained on image data, the input data would be organized as a 4-dimensional blob and 
+the value at index (n, k, h, w) is physically located at index ((n * K + k) * H + h) * W + w within the sequential Blob data structure.
+The first dimension corresponds to the image index in a batch of images and the other
+three indicates the number of channels (e.g. 3 for an RGB encoded image) and the image dimensions (height and width). Figure \ref{fig-blob}
+shows an example of an input blob. For this case, the blob 
 stores one image with 3 data segments, one per each image channel. 
 Images are sequentially stored in the blob following this pattern. 
-In respect to computation and parallelization, the blob
-is a sequential data structure in the form of an array of elements
-that are accessed through a base address plus an offset, given the
-value of several index dimensions.
+%In respect to computation and parallelization, the blob is a sequential data structure in the form of an array of elements
+%that are accessed through a base address plus an offset, given the value of several index dimensions.
 
 
 \subsubsection{Layer Computation}
-Layers apply a data transformation between input 
-and output blobs that is usually based on basic linear algebra 
-operations. These operations are computed in a piecewise manner 
-throughout the input blob. The input blob is organized in
+Each layer performs a data transformation by operating on the input blobs and generates
+output blobs. 
+%that is usually based on basic linear algebra operations. 
+These operations are computed in a piecewise manner 
+throughout the input blob. The input blob/s are organized in
 data segments where the linear algebra operations are applied. The
 size of the segments is constant and layer dependent. The output
-of the computation is another blob, again organized in fixed size
+of the computation are blob/s, again organized in fixed size
 segments. The computation of a layer is built upon an iterative
-structure that traverses the segments in the input blob and applies
+structure that traverses the segments in the input blob/s and applies
 a specific transformation based on one or more BLAS computations 
-to each segment. The output of the processing of one input data 
+on each segment. The output of the processing of one input data 
 segment is stored in one segment in the output blob. 
-Figure \ref{fig-blob-trans} shows an example for this computational 
+Figure. \ref{fig-blob-trans} shows an example for this computational 
 scheme as well as the relation between the input and output blobs 
 for a layer computation. Shadowed patches correspond data segments 
 in the blobs. In this case, 9 data segments in the input blob are 
 used to compute a one segment in the output blob. 
 
 In general, such transformations are implemented using basic algebra 
-operations like matrix-x-matrix or matrix-x-vector products. A layer 
-can be understood as a procedure based on several functions in the 
+operations like matrix-x-vector or matrix-x-matrix products and are often referred to as Level 2/3 BLAS operations \cite{BLAS}. 
+A layer can be understood as a procedure based on several functions in the 
 form of f$_i$(x, W$_i$, b$_i$) = W$_i$x + b$_i$. The layer coefficients 
 would correspond to the matrices W$_i$ and vectors b$_i$. Input x would 
 correspond to a data segment in the input blob. The training process 
-of a neural network searches the W$_i$ and b$_i$ coeffcients so that 
+of a neural network optimizes the W$_i$ and b$_i$ coefficients so that 
 the network accuracy is maximized for a particular data model.
 
 \subsubsection{Neural Network Training}
 The training process of a neural network is based on the gradient
 descent algorithm. The algorithm continuously seeks the minimization of a cost function along training epochs, where one epoch 
-constitutes the processing of all training data samples. These are 
+constitutes of processing all the training data samples. These are 
 grouped in batches of fixed size and during every epoch each batch 
 is processed in two steps. First, the batch samples are used to 
 compute the average error of the network. The samples 
 traverse the network where each layer applies its transformation and 
 temporally stores its output in a blob. This phase is identified as 
-the forward pass of the network. Second, the network computes the 
+the \emph{forward pass} of the network. Second, the network computes the 
 gradient of its transformation as a whole. In this phase, every layer 
-applies the chain rule for derivatives in a backward mode. From the 
+applies the chain rule for propagating the derivatives across the layers in the backward direction. From the 
 last layer up to the first one in the network, each layer propagates 
 its output multiplied by its derivative value. This phase is identified 
-as the backward phase. Both the forward and backward phases are 
+as the \emph{backward pass}. Both the forward and backward pass are 
 inherently sequential as both the output and the gradients have to 
 be propagated through the layers in an upward and downward manner across 
 the network. Algorithms \ref{alg-train}, \ref{alg-forw} and \ref{alg-back} 
 show the high level structure of the training algorithm as well as 
-how the data flow across the layers in the forward and backward phases.
+how the data flow across the layers in the forward and backward pass.
  
 %\IncMargin{1em}
 \begin{algorithm}
@@ -149,19 +153,19 @@ updateCoefficients(layers, top, diffs);
 Algorithm \ref{alg-train} corresponds to one training iteration. 
 Each data batch \emph{b} is propagated through the network. 
 First layer processes the batch and outputs the first transformation 
-for each sample in it. This is forwarded to the 
+for each sample in it. This is than forwarded to the 
 second layer to apply the next transformation. This process continues 
 until all layers have applied their transformation. The last layer 
 of the network is the one responsible to check the output of the 
 network and evaluate the network accuracy. The loop in line 3 implements 
-the batch network traversal, the network forward phase.
+the batch network computation, the network forward phase.
 This loop is inherently sequential and each layer 
-transformation happens within the \emph{forward} call. The ouput of 
+transformation happens within the \emph{forward} call. The output of 
 this call is stored in vector \emph{top} for all data samples in the 
 batch. Each \emph{forward} invocation uses as input the \emph{top} 
 produced by the previous layer. Loop in line 6 corresponds to the 
 computation of network gradients. Once the network has been evaluated 
-with one batch, the algorithm computes every layer gradient 
+with one batch, the algorithm computes every layers gradient 
 with respect its input. This process seeks the minimization 
 of the network error. This loop is also inherently sequential and 
 the \emph{backward} call computes the layer gradient, \emph{diffs}. 
@@ -169,7 +173,7 @@ This process requires both the evaluation of the layer transformation
 (\emph{top}) and the previous gradient computed in the immediate previous 
 layer (\emph{diffs}) in backward manner. It corresponds to the network 
 backward phase. Once both the forward and backward phases are completed, 
-the training algorithm updates the network coeffcients in all layers. 
+the training algorithm updates the network coefficients in all layers. 
 This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 
 \begin{algorithm}
@@ -212,7 +216,7 @@ This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
     \dots 
 \BlankLine
     \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}(W($d_1,d_2$, $\dots$, $d_N$), b($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+      diffs\_bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}(W($d_1,d_2$, $\dots$, $d_N$), b($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs\_top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
 }
 }
 }
@@ -225,15 +229,15 @@ in a nest of loops that traverse the \emph{N+1} dimensions (\emph{S, D$_1$,
 D$_2$, \dots, D$_N$}) of the layer input blob \emph{bottom} and produces 
 a transformation stored in the output blob \emph{top}. The first dimension 
 corresponds to the data samples in the batch. These are indexed with the 
-induction variable \emph{s}.  According to layer specific functions 
+variable \emph{s}.  According to layer specific functions 
 (\emph{f} and \emph{g} in line 5 of the algorithm), 
 data segments in the input/ouput blobs are processed through basic linear 
 algebra transformations (\emph{BLAS} call in line 5) that are also 
-dependant to the data segment being processed (\emph{W} and \emph{b} 
+dependent to the data segment being processed (\emph{W} and \emph{b} 
 depend on the loop induction variables). Algorithm 
 \ref{alg-back} follows a very similar structure, but operating with 
-blobs that store the gradient computation (\emph{diffs-bottom} and 
-\emph{diffs-top}).
+blobs that store the gradient computation (\emph{diffs\_bottom} and 
+\emph{diffs\_top}).
 
 
 \begin{figure*}[]
@@ -253,46 +257,46 @@ blobs that store the gradient computation (\emph{diffs-bottom} and
 \end{figure*}
 
 \subsection{Network Examples: MNIST and CIFAR-10}
-The MNIST and CIFAR-10 datasets are state-of-the-art datasets for 
-computer vision. The MNIST dataset is composed of 60,000 20x20 images 
+The MNIST \cite{Deng2012, MNIST} and CIFAR-10 \cite{CIFAR10} datasets are standard datasets for 
+computer vision. The MNIST dataset is composed of 60,000 images, each of dimension 28x28 pixels 
 of handwritten digits for training and 10,000 test examples. 
-Caffe includes a network description to generate an image 
+The Caffe distribution includes the LeNet \cite{LeNet} network for generating an image 
 classifier for this dataset. Given an a handwritten digit, 
 the network outputs which digit is represented (e.g.: 0 \dots 9). 
-The CIFAR-10 is another network included in Caffe 
+The CIFAR-10 is a CNN (Convolution Neural network) included in the Caffe distribution
 that performs as an image classifier for the CIFAR dataset. CIFAR is 
-composed of 60000 32x32 colour images in 10 classes: 
+composed of 60,000 32x32 color images with 10 classes: 
 \emph{airplane, automobile, bird, cat, deer, dog, frog, horse, ship, 
-truck} with 6000 images per class. Both benchmarks are built upon 
-a subset of all available layers in Caffe. 
+truck} with 6000 images per class. Both the networks are built with  
+a subset of the available layers within Caffe. 
 
 \subsubsection{Types of Layers}
-Caffe supports a great varity of network layers. The following 
-paragraph describes those mostly used for computer vision, and 
-in particular, for the two cases studied in this paper.
+Caffe supports a great variety of network layers. The following 
+paragraph describes the layers that are mostly used for computer vision, and 
+in particular, for the two example networks studied in this paper.
 
-The \textbf{Data Layer} cooresponds to the first layer in the 
+The \textbf{Data Layer} corresponds to the first layer in the 
 network. This layer is responsible of fetching the data in batches and 
-feed it to the network. The \textbf{Convolutional Layer} applies 
+feeding it to the network. The \textbf{Convolutional Layer} applies 
 a group of convolutions to an image. Its parameters are the size of the 
-convolutional patch and the stride to apply along the image, among other. 
+convolutional patch and the stride to apply along the image, among others. 
 In general, the coefficients in this type of layer are learnt so that 
 they capture what are the relevant data features 
 for the image classification. The \textbf{Pooling Layer} usually 
 follows the convolutional layer. In general, this layer applies an averaging 
 function over a subset of data points. The most usual functions are the 
-MAX function, when the pooling layer selects the maximum value for the 
+MAX pooling function, when the pooling layer selects the maximum value for the 
 subset, and the AVERAGE function, when the pooling layer computes the average 
 value of the subset. The \textbf{Local Response Normalization Layer} 
 performs a local normalization over a local region in the image. 
 This normalization can happen across the image channels or within the image 
 channels. The \textbf{Rectified Linear Unit Layer (ReLU)} computes 
 the max(x,0) function for each element in its input blob. 
-The \textbf{Inner Product Layer} also identified as a fully-conneted layer, 
+The \textbf{Inner Product Layer} also identified as a fully-connected layer, 
 performs a vector product between its input and coefficients.  
 The \textbf{Loss and Accuracy Layers} correspond 
-to the deepest layers in a network. They are responsible to evaluate the 
-loss funtion for the gradient computation and the overall network accuracy.
+to the deepest layers in the network. They are responsible for evaluating the 
+loss function for the gradient computation and the overall network accuracy.
 
 \subsubsection{Networks}
 The aim of this section is to briefly introduce the two networks 
@@ -305,19 +309,19 @@ existing parallelism within the layer.
 
 Figure \ref{fig-mnist} shows the layer composition for the MNIST network. 
 This network is composed of an initial data layer followed by the 
-combination of two instances of convolutional+pooling layers. The 
+combination of two instances of convolutional and pooling layers. The 
 convolutional layers are responsible for feature learning while the 
-pooling layers correspond to dimensionality reduction stages. 
-Then an inner product and relu layers continue reducing the dimensionality 
+pooling layers correspond to dimensionality reduction. 
+This is followed by a inner product layer (ip) and ReLU layer which furthermore reduces the dimensionality 
 of the data traversing the network, until the last inner product layer which 
-outputs a vector of 10 elements, one per class digit. The last layer corresponds to a loss layer.
+outputs a vector of 10 elements, one per digit class. The last layer corresponds to a loss layer.
 
 Figure \ref{fig-cifar} shows the layer composition for the CIFAR network. 
 As in the previous network, the first layer is a data layer, followed by 
-the combination of convolutional, relu and pooling layers. Again, convolutional 
+the combination of convolutional, ReLU and pooling layers. Again, convolutional 
 layers perform the feature learning and pooling layers perform the 
-dimensionality reduction. The relu layer controls the saturation of 
-the output of the convolutinoal coefficients. CIFAR also includes 
-normalization layers between the first two instances of convolution+pooling 
-layers.  Finally, an inner product + loss layers close the network. 
+dimensionality reduction. The ReLU layer controls the saturation of 
+the output of the convolutional coefficients. CIFAR also includes 
+normalization layers between the first two instances of convolution and pooling 
+layers.  The inner product layer (ip) and loss layer (SoftMax) are the last layers of the network. 
 
