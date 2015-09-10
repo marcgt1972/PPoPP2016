@@ -213,17 +213,61 @@ Figure \ref{fig-cifar-scalabitly} shows the scalability curves of all layers.
 Notice the appearance of the u-shape form as long as the number of threads 
 increases. The center part of each cluster corresponds to layers of very 
 small granularoty which do not affect the overall performance. These layers 
-are the pool3, ip1 and loss. The center part is composed of the forward 
-and backward phases of these layers.
+are the pool3, ip1 and loss. The center part includes both the forward 
+and backward phases of these layers. Leftmost part of each cluster 
+correspopnd to the layer forward phases, the rightmost part corresponds 
+to the layer backward phases.
 
 The CIFAR-10 network is organanized in three levels all of them with a 
 similar organization. First level corresponds to a sequence of a data 
-layer plus conv1+pool1+relu1+norm1. The data layer fetches the input 
-data (e.g: the batch images) sequentially so the conv1 layer suffers from 
-poor lacality respect its input data (the same situation observed with 
-the MNIST case). The work distribution is constant across the conv1, 
-pool1 and relu1 layers, and changes for the norm1. This implies  
+layer plus conv1+pool1+relu1+norm1. During the forward phase, the data 
+layer fetches the input data (e.g: the batch images) sequentially so 
+the conv1 layer suffers from poor lacality respect its input data 
+(the same situation observed with the MNIST case). The work distribution 
+is constant across the conv1, pool1 and relu1 layers, and then changes 
+for the norm1. According to this, the conv1 has a 
+reasonable speedup up to 8 threads (5.87x) but for 16 threads the 
+scalability drops with a 9x speedup. This is explained by the 
+sequential execution of its immediate previous layer and by the fact 
+that when crossing the 8 thread border, NUMA considerations come into 
+play. The effects of data movement are much more visible than when 
+just executing in one NUMA node. After the conv1 forward execution, 
+the pool1 and relu1 layers keep the same work distribution and expose 
+reasonable speedups: 6.5x and 7x respectively with 8 threads. These 
+layers scale up to 11x and 13x with 16 threads. The norm1 layer exposes 
+a different trend. This layer executes changing the data-thread 
+distribution. With 8 threads reaches a 4.6x speedup and with 
+16 threads 10.8x. Regarding the backward phase of all the layers 
+in this first level, the relation between the layers are similar, 
+but with less scalability. The maximum speedup for 16 threads are 
+10x, 6.6x, 7.75x for the conv1, pool1, relu1 and norm1 layers respectively. 
+The reduction operations within the backward phase are negleagible, 
+given the work size in each layer for the CIFAR-10 case. This happens 
+in all the nettwork levels.
 
+The second level in the network is composed of layers conv2, relu2 
+and norm2. In this level, the sizes of the input/output blobs decrease 
+and the work granularity too, but with the exception of layer conv2. 
+This workingset size reduction affects the overall scalability, 
+specially with 16 threads. In this level, the maximum speedups are 
+8.25x, 8.5x, 9x and 7x. In this case, the data-thread relation between the 
+layers is constant, unless for the norm2 layer. Specifically for the 
+first layer in this level, the conv2 layer, its poor scalability is 
+related to its immediate previous layer, the norm1 layer. This layer 
+changes the data-thread distribution and the conv2 layer is affected 
+by this fact. For the backward phase, the performnce trends are similar, 
+and again the reduction operations do not reduce the overall layer 
+scalability.
+
+Finally, the third level is composed by the conv3, relu3 and pool3 
+layers. This level follows a similar performance trends as the second 
+level, with the same relations between its layers and between the 
+immediate layer in the second level.
+
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
+\caption{CIFAR - ABS PERF + GPU LAYER }
+\end{figure*}
 \subsubsection{Fine-grain Layer Performance}
 \todo{Similar as MNIST}
 
