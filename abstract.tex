@@ -1,18 +1,20 @@
 Deep neural networks (DNN) have recently achieved extraordinary
-results in domains like computer vision, speech recognition and
-other. One key and essential element for this success
+results in domains like computer vision and speech recognition.
+An essential element for this success
 has been the introduction of high performance computing (HPC)
-techniques within one critical step in the network deployment: the
-network training. This paper describes the implementation and
+techniques in the critical step of training the neural network. 
+This paper describes the implementation and
 analysis of a coarse grain parallelization of the DNN training algorithm
-with two significant features. First, it enables multi-GPU
+with two significant features. 
+First, it enables multi-GPU
 execution without altering the algorithm convergence rate. Second,
 it exploits a parallelism level that is independent from the support
-of specialized and optimized libraries. Therefore, the optimization
-is immediately available for accelerating the DNN training. The parallelization
-has been implemented in Caffe, a state-of-the-art DNN framework. The paper
-describes the code transformations for the parallelization as well as
-we identify the limiting performance factors of the approach and expose
-appropriate optimizations. We show competitive performance
+of specialized and optimized libraries. 
+Therefore, the optimization
+is immediately available for accelerating the DNN training. 
+The parallelization
+has been implemented in Caffe, a state-of-the-art DNN framework. 
+The paper describes the code transformations for the parallelization as well as identifies limiting performance factors of the approach and expose appropriate optimizations. 
+We show competitive performance
 results for two state-of-the-art computer vision benchmarks, the
 MNIST and CIFAR-10 image classifiers.
