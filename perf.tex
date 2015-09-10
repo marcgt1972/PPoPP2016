@@ -95,35 +95,61 @@ not matching the one generated along the parallel execution of the
 conv1 layer. Therefore, the conv1 layer suffers from a poor data 
 locality with its immediate previous layer.
 
-\begin{figure}[]
-\includegraphics[width=\linewidth]{figures/mnist-gpu-layer-speedup.pdf}
-\caption{\todo{CAPTION}}
-\end{figure}
+%\begin{figure}[]
+%\includegraphics[width=\linewidth]{figures/mnist-gpu-layer-speedup.pdf}
+%\caption{\todo{CAPTION}}
+%\end{figure}
+
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/mnist-abs-perf+gpu-layer.pdf}
+\caption{MNIST - ABS PERF + GPU LAYER }
+\end{figure*}
 
 \subsubsection{Fine-grain Layer Performance}
-\todo{- In 2012, Caffe won the ILSVRC2012-winning SuperVision
-model and caching IO.
-- CPU version is not comparable in terms of the optimization
-efforts.
-- cuDNN is not general enough, it is totally oriented to image
-classification NO GENERALITY. Main success for accelera-
-tion of convolutions reaching speedups of XXXX.
-Make an example: no current support for LSTM in cuDNN,
-other examples ??
-Build the case for cuDNN NOT being a general framework for
-DNN.
-Compare with GPU BLAS level approach (and GPU-cuDNN?)
-}
+The fine-grain layer parallelization is available in Caffe in two versions. 
+All available layers come with a native GPU implementation of their 
+forward and backward phases. We identify this version as the \emph{plain-GPU} 
+version. Specifically for the convolutional and pooling layers, Caffe 
+includes a cuDNN-based version. We identify this version as the 
+\emph{cuDNN-GPU} version. 
+%Both present similar execution time distribution 
+%as the omp-1 serie in Figure \ref{fig-mnist-abs-rel}: convolutional and 
+%pooling layers dominate the GPU execution. 
+Rightmost side of Figure \ref{fig-mnist-abs} shows the per-layer 
+speedup numbers for the plain-GPU and cuDNN-GPU versions. 
+For the plain-GPU version, all layers present speedupd below 
+the 10x bar unless for specific exceptions. The pool1 and pool2 
+layers expose extraordinary speedups of 57x and 62x for their 
+forward phase respectively. The pool2 layer presents a speedup of 
+12.81x in its backward phase and the ip1 layer is also above the 
+10x bar with a speedup of 12.25x in its backward phase.
+In contrast, the convolutional layers present a very poor speedup, with 
+1.11, 1.63 for ther forward phases of conv1 and conv2, and 0.43x and 2.86x 
+in their respective backward phases. 
 
-\begin{figure}[b]
-\includegraphics[width=\linewidth]{figures/mnist-abs-perf-all.pdf}
-\caption{\todo{CAPTION}}
-\end{figure}
+For the cuDNN-GPU, the results are similar, unless for the convolutional 
+and pooling layers. The conv1 and conv2 layers experiment an extraordinary 
+improvement reaching speedups of 15x, 25x, 19x and 8x in their 
+forward and backward phases. In contrast, the pool2 layer experiments a 
+dramatic loss of performance: it drops from 62x to 27x in its forward 
+phase and from 12.81x to 8.81x in its backward phase. More moderately, 
+the relu layer also suffers a performance drop from 2.47x to 1.74x and 
+from 4x to 2,41x in its froward and backward phases respectively. 
+In general, cuDNN corresponds to a case where the industry has deployed 
+a highly optimized implementation of layer transformations that well 
+understood and no longer in a research stage. In this situation, the 
+fine-grain parallelism makes a difference, after the corresponding recoding 
+efforts.
+
+%\begin{figure}[b]
+%\includegraphics[width=\linewidth]{figures/mnist-abs-perf-all.pdf}
+%\caption{\todo{CAPTION}}
+%\end{figure}
 
 \subsubsection{Overall Performance}
 Figure \ref{fig-mnist-overall} shows the overall performance of
 the coarse-grain parallelization and the fine-grain parallelization in 
-its two verions GPU and GPU-cuDNN. The coarse-grain reaches a speedup 
+its two versions GPU and GPU-cuDNN. The coarse-grain reaches a speedup 
 close to a 6x with 8 threads, and 8x with 16 threads. The lack of 
 the scalability for the CPU version is related to the poor scalability 
 of fine-grained layers that when executing with 16 threads drag down 
@@ -137,26 +163,66 @@ corresponds to a base line defined by the Caffe native implementation
 of the GPU acceleration. It represents a case for the performance the DNN 
 community can obtain with a fine-grain parallelization and very significant 
 coding efforts. Remember that within Caffe, all layers have to have 
-their corresponding GPU implementation. In conclusion, the coarse-grain 
-approach minimizes the coding efforts and delivers better performance 
-levels. Of course, when compared to the cuDNN case, the fine-grain 
-approach makes the difference. It delivers a 12x speedup. But solutions 
-like the cuDNN framework are only available when the layer types and 
-their implementation have become a product and are no longer in a 
-research stage. Thus, they can have a highly optimized implementation. 
-For a DNN framework aimed to give support for 
-research in new network architectures with novel layer types, 
-the fine-grain parallelism imposes hard recoding efforts. In contrast, 
-the coarse-grain option is much more immediate and has been proved to be 
-more effective.
+both a CPU and GPU implementation to guarantee GPU acceleration. 
+In conclusion, the coarse-grain approach minimizes the coding efforts 
+and delivers better performance levels. Of course, when compared to 
+the cuDNN case, the fine-grain approach makes a difference. 
+It delivers a 12x speedup. But solutions like the cuDNN framework are 
+only available when the layer types and their implementation have become 
+a product and are no longer in a research stage. Thus, they can have a 
+highly optimized implementation. For a DNN framework like Caffe, 
+which is aimed to give support for research in new network architectures 
+with novel layer types, the fine-grain parallelism imposes hard recoding 
+efforts. In contrast, the coarse-grain option is much more immediate and 
+effective.
 
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/cifar-abs-rel-time.pdf}
+\caption{\todo{CIFAR - Relative and absolute execution layer time.}}
+\end{figure*}
 
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/cifar-scalability-layer.pdf}
+\caption{\todo{CIFAR - Layer scalability.}}
+\end{figure*}
 
 \subsection{The CIFAR-10 case}
+For the performance analysis of the CIFAr dataset we have followed the 
+same methodology as for the MNIST case. First, we have developped a 
+per-layer study both coarse-grain and fine-grain parallelizations. 
+For the coarse-grain case we identify what are the main limiting 
+peformance factors. Then we describe the overall performance of the 
+coarse-grain parallelization. 
 
-The dataset is divided into five training batches and one test batch, each with 10000 images. The test batch contains exactly 1000 randomly-selected images from each class. The training batches contain the remaining images in random order, but some training batches may contain more images from one class than another. Between them, the training batches contain exactly 5000 images from each class. 
 \subsubsection{Coarse-grain Layer Performance}
-\todo{Similar as MNIST}
+The CIFAr-10 dataset generates a work granularity greater than 
+the MNIST case. This can be observed in Figure \ref{fig-cifar-abs-rel}. 
+The figure shows per-layer absolute execution time and the relative 
+weigth in the overall execution time. It is clear that just a few 
+layers dominate the execution, no matter the number of threads. 
+These layers are the convolutional and pooling layers, and with 
+less weight the local response normalization layers. In general, 
+these layers account for almost 85\% of total execution time in 
+all thread configurations. Therefore, the layers with very small 
+granularity and exposing very poor scalability curves will not 
+determine the overall performance. Only the scalability of these 
+dominating layers will determine the effectiveness of the 
+parallelization.
+
+Figure \ref{fig-cifar-scalabitly} shows the scalability curves of all layers. 
+Notice the appearance of the u-shape form as long as the number of threads 
+increases. The center part of each cluster corresponds to layers of very 
+small granularoty which do not affect the overall performance. These layers 
+are the pool3, ip1 and loss. The center part is composed of the forward 
+and backward phases of these layers.
+
+The CIFAR-10 network is organanized in three levels all of them with a 
+similar organization. First level corresponds to a sequence of a data 
+layer plus conv1+pool1+relu1+norm1. The data layer fetches the input 
+data (e.g: the batch images) sequentially so the conv1 layer suffers from 
+poor lacality respect its input data (the same situation observed with 
+the MNIST case). The work distribution is constant across the conv1, 
+pool1 and relu1 layers, and changes for the norm1. This implies  
 
 \subsubsection{Fine-grain Layer Performance}
 \todo{Similar as MNIST}
@@ -164,26 +230,30 @@ The dataset is divided into five training batches and one test batch, each with 
 \subsubsection{Overall Performance}
 \todo{Similar as MNIST}
 
-\subsection{Coarse-grain Performance Limiting Factors}
+\subsection{Coarse-grain Parallelization: Pros and Cons}
 We have identified several factors that affect the batch-level
 parallelization of the Caffe DNN framework. These factors are
 layer dependant and are mainly related to specificities of the
 layers that determine their work distribution, memory footprint,
-data privatization and ordered operations. The following subsec-
-tions describe these limiting factors.
+data privatization and ordered operations. The following subsections 
+describe these limiting factors.
+
+\textbf{Network agnostic}:
+
+\textbf{Convergence invariance }:
 
 \textbf{Sequential memory allocation}: the network memory allocation
-happens during the network initialization. This process is sequen-
-tial, which causes the layer memory be allocated following a
-pattern generated by the initialization code. In terms of perfor-
-mance, this pattern is not compatible with those that arise during
+happens during the network initialization. This process is sequential, 
+which causes the layer memory be allocated following a
+pattern generated by the initialization code. In terms of performance, 
+this pattern is not compatible with those that arise during
 the training process.
 
 \textbf{Locality between layers:} the input/output relation across layers
-defines a lost of data locality for specific layers. During the for-
-ward and backward phases, each layer distributes the work ac-
-cording to the dimensions of the input blobs. Regarding the data
-locality, it is possible that input and output blobs do not match
+defines a lost of data locality for specific layers. During the forward 
+and backward phases, each layer distributes the work according to the 
+dimensions of the input blobs. Regarding the data locality, it is 
+possible that input and output blobs do not match
 their dimensions. Consequently, the work distribution and thread-
 data association defined in one layer will not match that one of the
 next immediate layer in the stack, causing some data movement
@@ -191,15 +261,14 @@ across the memory hierarchy.
 
 One particular case of this situation corresponds to the data
 layers in Caffe. These layers feed the network with input data
-organized in batches. Data layers execute in single-thread mode.
+organized in batches. Data layers execute in sequentially.
 Therefore, a one thread first accesses all data and then the data is
 distributed across the cores and the memory hierarchy when the
-first parallel processing layer in the network is executes in paral-
-lel. 
+first parallel processing layer in the network is executes in parallel. 
 
-\textbf{Work unbalance:} coarse grain parallelism is open to work unbal-
-ance. For the Caffe case, we have detected that batch-level paral-
-lelism defines very heavy iterations for the parallelized loops.
+\textbf{Work unbalance:} coarse grain parallelism is open to work unbalance. 
+For the Caffe case, we have detected that batch-level parallelism 
+defines very heavy iterations for the parallelized loops.
 Therefore, one single loop iteration can cause a high unbalance
 between the executing threads. In general, threads receive the
 same number of iterations (e.g.: under a static scheduling). But it
