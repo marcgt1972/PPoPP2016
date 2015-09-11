@@ -23,6 +23,12 @@ image classifiers.
 \label{fig-mnist-scalability}
 \end{figure*}
 
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/mnist-abs-perf+gpu-layer.pdf}
+\caption{MNIST - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}.}
+\label{fig-mnist-overall}
+\end{figure*}
+
 \subsection{MNIST dataset}
 For the performance analysis of the MNIST dataset we have first 
 developed a per-layer study both coarse-grain and fine-grain parallelizations.For the coarse-grain case we identify what are the main limiting 
@@ -105,16 +111,11 @@ not matching the one generated along the parallel execution of the
 conv1 layer. Therefore, the conv1 layer suffers from a poor data 
 locality with its immediate previous layer.
 
-%\begin{figure}[]
-%\includegraphics[width=\linewidth]{figures/mnist-gpu-layer-speedup.pdf}
-%\caption{\todo{CAPTION}}
-%\end{figure}
-
-\begin{figure*}[]
-\includegraphics[width=\textwidth]{figures/mnist-abs-perf+gpu-layer.pdf}
-\caption{MNIST - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}.}
-\label{fig-mnist-overall}
-\end{figure*}
+%\begin{figure*}[]
+%\includegraphics[width=\textwidth]{figures/mnist-abs-perf+gpu-layer.pdf}
+%\caption{MNIST - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}.}
+%\label{fig-mnist-overall}
+%\end{figure*}
 
 \subsubsection{Fine-grain Layer Performance}
 The fine-grain layer parallelization is available in Caffe in two versions. 
@@ -199,6 +200,12 @@ effective.
 \label{fig-cifar-scalability}
 \end{figure*}
 
+\begin{figure*}[]
+\includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
+\caption{CIFAR-10 - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}.}
+\label{fig-cifar-overall}
+\end{figure*}
+
 \subsection{The CIFAR-10 case}
 For the performance analysis of the CIFAR-10 dataset we have followed the 
 same methodology as for the MNIST case. First, we have developed a 
@@ -277,11 +284,11 @@ layers. This level follows a similar performance trends as the second
 level, with the same relations between its layers and between the 
 immediate layer in the second level.
 
-\begin{figure*}[]
-\includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
-\caption{CIFAR-10 - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}.}
-\label{fig-cifar-overall}
-\end{figure*}
+%\begin{figure*}[]
+%\includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
+%\caption{CIFAR-10 - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}.}
+%\label{fig-cifar-overall}
+%\end{figure*}
 
 \subsubsection{Fine-grain Layer Performance}
 Rightmost side of Figure \ref{fig-cifar-overall} shows the per-layer
