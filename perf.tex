@@ -88,7 +88,7 @@ We have detected that although being exactly the same layer, the conv1
 and conv2 layers have close to a 10\% difference in speedup. 
 In particular, the conv2 layer exposes greater speedups than conv1. 
 This happens more noticeably with more than 8 threads and for the 
-forward phase. The difference between the two layers is the position 
+forward pass. The difference between the two layers is the position 
 they occupy in the layer stack. Conv1 is the immediate layer after the 
 data layer in the MNIST network. The data layer is responsible for
 feeding the network with data samples. The layer executes sequentially, 
@@ -123,9 +123,9 @@ speedup numbers for the plain-GPU and cuDNN-GPU versions.
 For the plain-GPU version, all layers present speedup below 
 the 10$\times$ bar unless for specific exceptions. The pool1 and pool2 
 layers expose extraordinary speedups of 57$\times$ and 62$\times$ for their 
-forward phase respectively. The pool2 layer presents a speedup of 
-12.81$\times$ in its backward phase and the ip1 layer is also above the 
-10$\times$ bar with a speedup of 12.25$\times$ in its backward phase.
+forward passes respectively. The pool2 layer presents a speedup of 
+12.81$\times$ in its backward pass and the ip1 layer is also above the 
+10$\times$ bar with a speedup of 12.25$\times$ in its backward pass.
 In contrast, the convolutional layers present a very poor speedup, with 
 1.11, 1.63 for the forward passes of conv1 and conv2, and 0.43$\times$ and 2.86$\times$ 
 in their respective backward passes. 
@@ -135,7 +135,7 @@ and pooling layers. The conv1 and conv2 layers experiment an extraordinary
 improvement reaching speedups of 15$\times$, 25$\times$, 19$\times$ and 8$\times$ in their 
 forward and backward passes. In contrast, the pool2 layer experiments a 
 dramatic loss of performance: it drops from 62$\times$ to 27$\times$ in its forward 
-phase and from 12.81$\times$ to 8.81$\times$ in its backward phase. More moderately, 
+pass and from 12.81$\times$ to 8.81$\times$ in its backward pass. More moderately, 
 the ReLU layer also suffers a performance drop from 2.47$\times$ to 1.74$\times$ and 
 from 4$\times$ to 2,41$\times$ in its froward and backward passes respectively. 
 In general, cuDNN corresponds to a case where the industry has deployed 
@@ -225,7 +225,7 @@ to the layer backward pass.
 
 The CIFAR-10 network is organized in three levels all of them with a 
 similar organization. First level corresponds to a sequence of a data 
-layer plus conv1+pool1+ReLU1+norm1. During the forward phase, the data 
+layer plus conv1+pool1+ReLU1+norm1. During the forward pass, the data 
 layer fetches the input data (e.g: the batch images) sequentially so 
 the conv1 layer suffers from poor locality respect its input data 
 (the same situation observed with the MNIST case). The work distribution 
@@ -242,7 +242,7 @@ reasonable speedups: 6.5$\times$ and 7$\times$ respectively with 8 threads. Thes
 layers scale up to 11$\times$ and 13$\times$ with 16 threads. The norm1 layer exposes 
 a different trend. This layer executes changing the data-thread 
 distribution. With 8 threads reaches a 4.6$\times$ speedup and with 
-16 threads 10.8$\times$. Regarding the backward phase of all the layers 
+16 threads 10.8$\times$. Regarding the backward pass of all the layers 
 in this first level, the relation between the layers are similar, 
 but with less scalability. The maximum speedup for 16 threads are 
 10$\times$, 6.6$\times$, 7.75$\times$ for the conv1, pool1, ReLU1 and norm1 layers respectively. 
@@ -388,7 +388,7 @@ At some level in the network, the input/output blobs start decreasing their size
 starts suffering from too small work granularity with poor performance levels.
 
 \textbf{Data privatization and reduction operations:} specifically in the
-backward phase, the network coefficients are updated per each
+backward pass, the network coefficients are updated per each
 sample in the batch. At batch-level, this requires mutual exclusion
 mechanisms to guarantee a ordered update. Data privatization has
 been needed for this purpose. Caffe is implemented following an
