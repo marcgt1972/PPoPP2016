@@ -207,7 +207,7 @@ original sequential order.
 \BlankLine
 \emph{/* Object Privatization */}
 \BlankLine
-Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
+Blob private-diffs\_bottom(M, $O_1, O_2$, $\dots$, $O_M$);
 \BlankLine
 caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
 \BlankLine
@@ -232,14 +232,14 @@ caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
     \dots
     \BlankLine
     \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+      private-diffs\_bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs\_top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
 }
 }
 }
 \textbf{\#pragma omp for ordered}
 \BlankLine
 \For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
-  caffe\_add(diffs-bottom, private-diffs-bottom, \dots);
+  caffe\_add(diffs\_bottom, private-diffs\_bottom, \dots);
 }
 \}
 \end{algorithm}
@@ -247,11 +247,11 @@ caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
 The aim of this section is to describe the main differences between 
 the coarse-grain and fine-grain approaches when it comes to the 
 parallelization of a layer transformation. If for the coarse-grain 
-case the outermost loop is parallelized after approapriate loop 
+case the outermost loop is parallelized after appropriate loop 
 coalescing, the fine-grain approach focusses on the innermost loops.
 Similarly, this approach coalesces as much as possible inner loops 
 so that enough work is generated for the fine-grain threads in 
-the GPU device. It is this process what requieres consideable programming 
+the GPU device. It is this process what requires considerable programming 
 efforts. The inner loop coalescing has to be done having in mind the 
 work distribution mechanisms for GPU threads. Here we refer to the 
 thread \emph{blocks} and \emph{grids}. In general, the more loops 
