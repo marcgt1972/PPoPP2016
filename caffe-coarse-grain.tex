@@ -24,7 +24,7 @@ can be substituted with specialized libraries like Atlas, OpenBLAS  or Intel MKL
 
 \subsubsection{Blob Level Parallelism}
 This level of parallelism corresponds to the nested loops in the forward
-and backward phases in lines 2 and 5 in algorithms 
+and backward pass in lines 2 and 5 in algorithms 
 \ref{alg-forw} and \ref{alg-back}. 
 These loops traverse the data segments in the input and output blobs and
 perform BLAS calls for each segment. This kind of parallelism can be
@@ -40,7 +40,7 @@ This level corresponds to the loop in line 1 of algorithms \ref{alg-forw}
 and \ref{alg-back}. 
 This loop traverses the data samples in the batch and its parallelism 
 can be exploited but with limitations. 
-Specifically for the backward phase, it requires reduction operations 
+Specifically for the backward pass, it requires reduction operations 
 for the network coefficient update. The training algorithm averages all 
 gradients computed with each sample in the batch. This averaging
 has to be protected with mutual exclusion operations or ordered
@@ -75,7 +75,7 @@ gradients.
 \setstretch{0.25}
 \small
 %\algsetup{linenosize=\footnotesize}
-\caption{Coarse-grain parallel layer forward phase}
+\caption{Coarse-grain parallel layer forward pass}
 \label{alg-par-forw}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
 %\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
@@ -175,7 +175,7 @@ The number of coalesced loops is layer dependent, and this optimization
 has been manually performed. The main difference resides on the special 
 treatment for the gradient update (\emph{diffs\_top} and \emph{diffs\_bottom} 
 variables). Recall that the DNN training algorithm averages all gradients 
-computed within a batch. This happens during the layer backward phase.
+computed within a batch. This happens during the layer backward pass.
 Now, this computation has been parallelized, so the gradient update has 
 to be implemented through a reduction operation and thread mutual exclusion 
 mechanisms. In the algorithm, this corresponds to lines 18-20. An ordered loop 
@@ -192,7 +192,7 @@ original sequential order.
 \begin{algorithm}
 \setstretch{0.15}
 \small
-\caption{Coarse-grain parallel layer backward phase}
+\caption{Coarse-grain parallel layer backward pass}
 \label{alg-par-back}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
 %\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}

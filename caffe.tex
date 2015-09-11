@@ -164,7 +164,7 @@ second layer to apply the next transformation. This process continues
 until all layers have applied their transformation. The last layer 
 of the network is the one responsible to check the output of the 
 network and evaluate the network accuracy. The loop in line 3 implements 
-the batch network computation, the network forward phase.
+the batch network computation, the network forward pass.
 This loop is inherently sequential and each layer 
 transformation happens within the \emph{forward} call. The output of 
 this call is stored in vector \emph{top} for all data samples in the 
@@ -178,7 +178,7 @@ the \emph{backward} call computes the layer gradient, \emph{diffs}.
 This process requires both the evaluation of the layer transformation 
 (\emph{top}) and the previous gradient computed in the immediate previous 
 layer (\emph{diffs}) in backward manner. It corresponds to the network 
-backward phase. Once both the forward and backward phases are completed, 
+backward pass. Once both the forward and backward passes are completed, 
 the training algorithm updates the network coefficients in all layers. 
 This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 
@@ -186,7 +186,7 @@ This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 \begin{algorithm}
 \setstretch{0.25}
 \small
-\caption{Layer forward phase}
+\caption{Layer forward pass}
 \label{alg-forw}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
 %\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
@@ -228,7 +228,7 @@ blobs that store the gradient computation (\emph{diffs\_bottom} and
 \setlength{\textfloatsep}{0pt}% Remove \textfloatsep
 \begin{algorithm}
 \small
-\caption{Layer backward phase}
+\caption{Layer backward pass}
 \label{alg-back}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
 %\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
