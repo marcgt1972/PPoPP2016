@@ -28,16 +28,16 @@ correspond to executions with 1, 2, 4, 8, 12 and 16 threads. In general,
 two layers dominate the whole execution: the convolutional and pooling 
 layers. No matter the number of threads, these two type of layers always 
 account for almost 80\% of total execution time, adding their forward 
-and backward phases. Notice that there are different instances of the 
+and backward passes. Notice that there are different instances of the 
 same type of layer but with very different absolute execution time. 
 For instance, the \emph{conv1} and conv2 layers, and in a smaller magnitude 
 the pool1 and pool2 layers. After the convolutional and pooling layers, 
 the next significant layer is the inner product ip1. The rest of layers, 
 expose a very small contribution to the overall execution time 
-(e.g.: loss, ReLU and ip2 layers in their forward and backward phases).
+(e.g.: loss, ReLU and ip2 layers in their forward and backward passes).
 In general, notice that in each horizontal bar there is a zone where the 
 work in each layer phase decreases. This corresponds to the center part, 
-composed of the forward and backward phases of pool2, ip1, ReLU, ip2 and loss.
+composed of the forward and backward passes of pool2, ip1, ReLU, ip2 and loss.
 This behavior is associated to the dimensionality reduction that neural 
 networks do, and affects the work granularity for the parallelization process.
 Moreover, this behavior limits the overall scalability of the training process.
@@ -49,16 +49,16 @@ correspond to the layers that we have previously identified as not
 significant in the overall execution time (e.g.: loss, ReLU and ip2 layers). 
 These layers do not scale at all, but they do not represent a limitation for 
 the overall performance. The two sides on the center values correspond 
-to the forward and backward phases of the rest layers. For these, we detect 
+to the forward and backward passes of the rest layers. For these, we detect 
 two types of layer behavior. 
 
 Layers ip1 and pool2 present very poor scalability curves. 
-For ip1, in both the forward and backward phases, the layer 
+For ip1, in both the forward and backward passes, the layer 
 presents speedups of 4,58 and 5,93 for the forward and backward 
-phases respectively and with 8 threads. The layer does not improve 
+pass respectively and with 8 threads. The layer does not improve 
 the speedup with more threads. The pool2 layer exposes the same 
 behavior with maximum speedup of 5.52 and 5.73 with 8 threads in 
-the forward and backward phases respectively. The reason for this 
+the forward and backward pass respectively. The reason for this 
 behavior is two fold. First, notice the two layers are immediately 
 stacked one on top of the other. This means that the 
 output of the pool2 layer is the input for the ip1 layer. It happens 
@@ -72,7 +72,7 @@ not match those of the input blob for the pool2 layer. Thus, theres is
 an unavoidable lost of locality for the execution of the ip1 layer. 
 Second, both layers suffer from a poor granularity when executing with 
 more than 8 threads. In Figure \ref{fig-mnist-abs-rel} we observe that 
-with more than 8 threads the forward and backward phases of the two layers 
+with more than 8 threads the forward and backward passes of the two layers 
 are in the range of 350 microseconds.
 
 Layers conv1, pool1 and conv2 present good scalability curves. They 
@@ -83,7 +83,7 @@ First, all these layers expose a considerable amount of work, as it has
 been indicated with Figure \ref{fig-mnist-abs-rel}. Second, all of them 
 are stacked one next to each other within the network, and all of them 
 match their input/output blob dimensions. Thus, data locality is 
-preserved along the their execution in both the forward and backward phases.
+preserved along the their execution in both the forward and backward passes.
 We have detected that although being exactly the same layer, the conv1 
 and conv2 layers have close to a 10\% difference in speedup. 
 In particular, the conv2 layer exposes greater speedups than conv1. 
@@ -111,7 +111,7 @@ locality with its immediate previous layer.
 \subsubsection{Fine-grain Layer Performance}
 The fine-grain layer parallelization is available in Caffe in two versions. 
 All available layers come with a native GPU implementation of their 
-forward and backward phases. We identify this version as the \emph{plain-GPU} 
+forward and backward pass. We identify this version as the \emph{plain-GPU} 
 version. Specifically for the convolutional and pooling layers, Caffe 
 includes a cuDNN-based version. We identify this version as the 
 \emph{cuDNN-GPU} version. 
@@ -133,7 +133,7 @@ in their respective backward passes.
 For the cuDNN-GPU, the results are similar, unless for the convolutional 
 and pooling layers. The conv1 and conv2 layers experiment an extraordinary 
 improvement reaching speedups of 15$\times$, 25$\times$, 19$\times$ and 8$\times$ in their 
-forward and backward phases. In contrast, the pool2 layer experiments a 
+forward and backward passes. In contrast, the pool2 layer experiments a 
 dramatic loss of performance: it drops from 62$\times$ to 27$\times$ in its forward 
 phase and from 12.81$\times$ to 8.81$\times$ in its backward phase. More moderately, 
 the ReLU layer also suffers a performance drop from 2.47$\times$ to 1.74$\times$ and 
@@ -219,9 +219,9 @@ Notice the appearance of the u-shape form as long as the number of threads
 increases. The center part of each cluster corresponds to layers of very 
 small granularity which do not affect the overall performance. These layers 
 are the pool3, ip1 and loss. The center part includes both the forward 
-and backward phases of these layers. Leftmost part of each cluster 
-correspond to the layer forward phases, the rightmost part corresponds 
-to the layer backward phases.
+and backward pass of these layers. Leftmost part of each cluster 
+correspond to the layer forward pass, the rightmost part corresponds 
+to the layer backward pass.
 
 The CIFAR-10 network is organized in three levels all of them with a 
 similar organization. First level corresponds to a sequence of a data 
