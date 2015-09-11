@@ -12,12 +12,15 @@ training algorithm in terms of how the computations happen across
 the network, how the data flow across these layers 
 and the different types and levels of parallelism that exist within each layer.
 
+%\setlength{\textfloatsep}{7pt}
+
 \begin{figure}[]
 \centering
 \includegraphics[width=5cm]{figures/blob1.pdf}
 \caption{Example of blob structure and data segments within the blob. Each image is composed of data of three channels. Each channel is stored in one blob segment, so that every image occupies three blob segments. Images are stored sequentially one after the other within the blob.}
 \label{fig-blob}
 \end{figure}
+
 \begin{figure}[]
 \centering
 \includegraphics[width=5cm]{figures/blob2.pdf}
