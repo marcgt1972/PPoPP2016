@@ -4,10 +4,11 @@ and has become one main platform for neural network algorithm development.
 Two main reasons justify this. Firstly, Caffe supports
 many network architectures and different training algorithms for
 neural networks. Secondly, Caffe is optimized with GPU acceleration.
-This section describes the main operational aspects of Caffe
-regarding its parallelization. 
+All supported layers in Caffe have two implementations, one for CPU 
+one for GPU. This section describes the main operational aspects 
+of Caffe regarding its parallelization. 
 %It is not a functional description of the framework and its capabilities for the design of neural networks. 
-The main focus of this section is to describe the neural network 
+The objective is to describe the neural network 
 training algorithm in terms of how the computations happen across 
 the network, how the data flow across these layers 
 and the different types and levels of parallelism that exist within each layer.
