@@ -279,7 +279,7 @@ the gradients. The private storage for the gradients has to be properly
 initialized to the neutral value of the reduction operation, in the case 
 the zero value (lines 4-5 in the algorithm). 
 
-%\subsection{GPU-code vs CPU-code}
+\subsection{Coarse-grain vs Fine-grain parallelization}
 %\todo{coalescing happens different. In gPU it happens fro the innermost loops. In CPU fro the outermost loops. GPU exploits finer grain,CPU coarser grain }
 %\todo{emphasis in recoding, CPU version does not need recoding. }
 
@@ -290,33 +290,33 @@ the zero value (lines 4-5 in the algorithm).
 %the target of this paper. Section XX describes the parallelization 
 %process for the exploitation of this level of parallelism.}
 
-%\begin{algorithm}
-%\caption{Fine-grain parallel layer forward phase}
-%\label{alg-fine-par-forw}
-%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
-%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
-%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
-%\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
-%\Output{Top blob for the layer transformation}
-%\BlankLine
-%\For{$s \leftarrow 1$ \KwTo $S$}{
-%\BlankLine
-%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
-    %\dots
-%\BlankLine
-    %\For{$d_k \leftarrow 1$ \KwTo $D_k$}{
-      %\For{$civ \leftarrow 1$ \KwTo $D_{\text{k+1}}$*$\dots$*$D_N$}{
-        %\BlankLine
-        %$d_{\text{k+1}}$ = $f_{\text{k+1}}$(civ);
-        %\BlankLine
-        %\dots
-        %\BlankLine
-        %$d_N$ = $f_N$(civ);
-        %\BlankLine
-          %top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
-%}
-%}
-%}
-%}
-%\end{algorithm}
+\begin{algorithm}
+\caption{Fine-grain parallel layer forward phase}
+\label{alg-fine-par-forw}
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+\Output{Top blob for the layer transformation}
+\BlankLine
+\For{$s \leftarrow 1$ \KwTo $S$}{
+\BlankLine
+\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
+    \dots
+\BlankLine
+    \For{$d_k \leftarrow 1$ \KwTo $D_k$}{
+      \For{$civ \leftarrow 1$ \KwTo $D_{\text{k+1}}$*$\dots$*$D_N$}{
+        \BlankLine
+        $d_{\text{k+1}}$ = $f_{\text{k+1}}$(civ);
+        \BlankLine
+        \dots
+        \BlankLine
+        $d_N$ = $f_N$(civ);
+        \BlankLine
+          top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+}
+}
+}
+}
+\end{algorithm}
 

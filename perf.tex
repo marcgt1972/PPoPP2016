@@ -5,12 +5,14 @@ OpenBLAS
 
 \begin{figure*}[]
 \includegraphics[width=\linewidth]{figures/mnist-rel-abs-time.pdf}
-\caption{\todo{MNIST - Relative and absolute execution layer time.}}
+\caption{MNIST - Relative and absolute execution layer time for CPU executions. Layers in the legend are ordered from left-to-right in each horizontal bar. Horizontal bars correspond to the cases of 1, 2, 4, 8, 12 and 16 threads. All execution times are in microseconds.}
+\label{fig-mnist-abs-rel}
 \end{figure*}
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/mnist-scalability-layer.pdf}
-\caption{MNIST - Layer Scalability}
+\caption{MNIST - Layer scalability for the CPU executions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis meausres speedup factors from the serial CPU execution.}
+\label{fig-mnist-scalability}
 \end{figure*}
 
 \subsection{MNIST dataset}
@@ -102,7 +104,8 @@ locality with its immediate previous layer.
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/mnist-abs-perf+gpu-layer.pdf}
-\caption{MNIST - ABS PERF + GPU LAYER }
+\caption{MNIST - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}.}
+\label{fig-mnist-overall}
 \end{figure*}
 
 \subsubsection{Fine-grain Layer Performance}
@@ -115,7 +118,7 @@ includes a cuDNN-based version. We identify this version as the
 %Both present similar execution time distribution 
 %as the omp-1 serie in Figure \ref{fig-mnist-abs-rel}: convolutional and 
 %pooling layers dominate the GPU execution. 
-Rightmost side of Figure \ref{fig-mnist-abs} shows the per-layer 
+Rightmost side of Figure \ref{fig-mnist-overall} shows the per-layer 
 speedup numbers for the plain-GPU and cuDNN-GPU versions. 
 For the plain-GPU version, all layers present speedupd below 
 the 10x bar unless for specific exceptions. The pool1 and pool2 
@@ -178,12 +181,13 @@ effective.
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-abs-rel-time.pdf}
-\caption{\todo{CIFAR - Relative and absolute execution layer time.}}
+\caption{CIFAR-10 - Relative and absolute execution layer time for CPU executions. Layers in the legend are ordered from left-to-right in each horizontal bar. Horizontal bars correspond to the cases of 1, 2, 4, 8, 12 and 16 threads. All execution times are in microseconds.}
+\label{fig-cifar-abs-rel}
 \end{figure*}
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-scalability-layer.pdf}
-\caption{\todo{CIFAR - Layer scalability.}}
+\caption{CIFAR-10 - Layer scalability for CPU executions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis meausres speedup factors from the serial CPU execution.}
 \end{figure*}
 
 \subsection{The CIFAR-10 case}
@@ -266,25 +270,85 @@ immediate layer in the second level.
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
-\caption{CIFAR - ABS PERF + GPU LAYER }
+\caption{CIFAR-10 - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}.}
 \end{figure*}
+
 \subsubsection{Fine-grain Layer Performance}
-\todo{Similar as MNIST}
+Rightmost side of Figure \ref{fig-cifar-abs} shows the per-layer
+speedup numbers for the plain-GPU and cuDNN-GPU versions.
+For the plain-GPU version, the layer speedupos are impressive. 
+In the forward pass, all layers present speedups above 10x, and for 
+the pooling and lrn layers the speedups are close to 110x and 40x 
+respectively (depending on the layer intsance and pass in the network). 
+The convolutional layers are represent the bottleneck. they present 
+speedups between 1.8x and 6x depending on the layer position in the 
+network and in the pass (forward or backward).
+
+For the cuDNN-GPU, the trends are similar as in the MNISt case 
+regarding the convolutional and pooling layers. The convolutional 
+layers expose impressive improvements. They switch to performance 
+levels close to 50x of speedup in some cases (conv2 layer).
+Some of the pooling layers expose drastic performance drops (pool3 
+forward pass switches from 42x to 11.75x). Others improve the 
+performance (pool1 from 8.6x to 20.9x). 
+As it was stated with the MNIST dataset, cuDNN corresponds to a case 
+where the industry has deployed a highly optimized implementation of 
+specific layer transformations that are well understood and no longer 
+in a research stage. In this situation, the fine-grain parallelism makes 
+a difference, though after the corresponding recoding efforts.
 
 \subsubsection{Overall Performance}
-\todo{Similar as MNIST}
+Figure \ref{fig-cifar-overall} shows the overall performance of
+the coarse-grain parallelization and the fine-grain parallelization in
+its two versions GPU and GPU-cuDNN. The coarse-grain reaches a speedup
+close to a 6x with 8 threads, and 8.83x with 16 threads. The lack of
+the scalability for the CPU version is related to the poor scalability
+of some of the convolutional layers. This is caused by poor data locality caused by consecutive layers with different data-thread patterns. 
+In addition, again the serial initialization of
+the network structures is giving a suboptimal memory allocation in
+the NUMA nodes. All of this is affecting the final scalability of
+the coarse-grain version. The fine-grain GPU version shows a
+modest speed up close to 6x. Both the fine-grain GPU version and 
+coarse-grain CPU version expose problems with the convolutional layers.
+In general, the fine-grain GPU version corresponds to the Caffe native 
+implementation. This implementation is representative of the 
+performance the DNN community can obtain after the associated recoding 
+efforts. The coarse-grain parallelization gives similar performance levels, but not requiring the reimplementation of all layers to target the GPU device. 
 
-\subsection{Coarse-grain Parallelization: Pros and Cons}
-We have identified several factors that affect the batch-level
-parallelization of the Caffe DNN framework. These factors are
-layer dependant and are mainly related to specificities of the
-layers that determine their work distribution, memory footprint,
-data privatization and ordered operations. The following subsections 
-describe these limiting factors.
+As with the MNIST case, when compared to the cuDNN case, the fine-grain 
+approach makes a difference and this time even greater. cuDNN gives 
+extraordinary speedups and it corresponds to an unbeatable implementation 
+of the convolutional and pooling layers made by NVIDIA. It delivers a 
+27x speedup. Unfortunatelly, this performance levels are only available 
+for these two layer types. In contrast, the coarse-grain approach is 
+immediately available no matter the nature of the deep neural network.
 
-\textbf{Network agnostic}:
+\subsection{Coarse-grain vs Fine-grain: Pros and Cons}
+In this section we present the lessons learnt regarding the coarse-grain 
+and fine-grain parallelizations of the DNN training process. We identify 
+several limiting factors that affect the performance of the 
+coarse-grain parallelization. These factors are layer dependant and are 
+mainly related to specificities of the layers that determine their 
+work distribution, memory footprint, data privatization and ordered 
+operations. Also, we identify the advantages and disadvantages of 
+the coarse-grain approach in front a fine-grain parallelization. 
+The following subsections describe these limiting factors, 
+advantages and disadvantages.
 
-\textbf{Convergence invariance }:
+\textbf{Network agnostic}: one important advantage of the coarse-grain 
+approach is that it exploits a parallelism level that is independant of 
+the nature of the neural network. The batch-level parallelism is 
+intrinsic to the gradient descent algorithm. Thus, this approach is 
+immediately available and does not require programming efforts to generate 
+GPU layer implementations. In addition, the coarse-grain approach 
+delivers similar performance levels as the fine-grain approach. 
+
+\textbf{Convergence invariance}: the coarse-grain parallelization does not 
+change any training parameters. Thus, the convergence rate is kept 
+invariant between the serial and the parallel executions. 
+For the DNN community this is an important advantage. Before 
+the training, neural networks need a parameter tuning process to ensure 
+appropriate convergence. The parallelization has to ensure that the effects of this tuning are kept for the paralell execution.
 
 \textbf{Sequential memory allocation}: the network memory allocation
 happens during the network initialization. This process is sequential, 
@@ -298,10 +362,9 @@ defines a lost of data locality for specific layers. During the forward
 and backward phases, each layer distributes the work according to the 
 dimensions of the input blobs. Regarding the data locality, it is 
 possible that input and output blobs do not match
-their dimensions. Consequently, the work distribution and thread-
-data association defined in one layer will not match that one of the
-next immediate layer in the stack, causing some data movement
-across the memory hierarchy.
+their dimensions. Consequently, the work distribution and data-thread
+association defined in one layer will not match that one of the
+next immediate layer in the stack.
 
 One particular case of this situation corresponds to the data
 layers in Caffe. These layers feed the network with input data
@@ -314,13 +377,10 @@ first parallel processing layer in the network is executes in parallel.
 For the Caffe case, we have detected that batch-level parallelism 
 defines very heavy iterations for the parallelized loops.
 Therefore, one single loop iteration can cause a high unbalance
-between the executing threads. In general, threads receive the
-same number of iterations (e.g.: under a static scheduling). But it
-is possible that some of the threads receive one more iteration
-than other threads when the number of samples in the batch is not
+between the executing threads. 
 
-\textbf{Work granularity:} as previously described, neural networks try
-to perform a dimensionality reduction over the processed data.
+\textbf{Work granularity:} neural networks do
+a dimensionality reduction over the processed data.
 And this affects the size of the working sets in the network layers.
 At some level in the network, the input/output blobs start decreasing their sizes. When this happens, a thread level parallelization
 starts suffering from too small work granularity with poor performance levels.
@@ -328,9 +388,10 @@ starts suffering from too small work granularity with poor performance levels.
 \textbf{Data privatization and reduction operations:} specifically in the
 backward phase, the network coefficients are updated per each
 sample in the batch. At batch-level, this requires mutual exclusion
-mechanisms to guarantee a correct update. Data privatization has
+mechanisms to guarantee a ordered update. Data privatization has
 been needed for this purpose. Caffe is implemented following an
-object-oriented design and object privatization (e.g.: blobs) has
-performance implications regarding the invocation of object constructor/destructor.
+object-oriented design and object privatization (e.g.: blobs) 
+has performance implications regarding the invocation of object 
+constructor/destructor.
 
 
