@@ -392,8 +392,8 @@ between the executing threads. Loop coalescing has been applied to reduce the ef
 \textbf{Work granularity:} neural networks do
 a dimensionality reduction over the processed data.
 And this affects the size of the working sets in the network layers.
-At some level in the network, the input/output blobs start decreasing their sizes. When this happens, a thread level parallelization
-starts suffering from too small work granularity with poor performance levels.
+At some level in the network, the layer input/output data start decreasing their sizes. When this happens, a thread level parallelization
+starts suffering from small work granularity with modest performance levels.
 \textbf{Data privatization and reduction operations:} specifically in the
 backward pass, the network coefficients are updated per each
 sample in the batch. At batch-level, this requires mutual exclusion
