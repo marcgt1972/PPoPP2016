@@ -72,6 +72,7 @@ gradients.
 %\end{algorithm}
 
 \begin{algorithm}
+\setstretch{0.25}
 \small
 %\algsetup{linenosize=\footnotesize}
 \caption{Coarse-grain parallel layer forward phase}
@@ -116,100 +117,6 @@ gradients.
 }
 \}
 \end{algorithm}
-
-\begin{algorithm}
-\small
-\caption{Coarse-grain parallel layer backward phase}
-\label{alg-par-back}
-%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
-%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
-\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
-\Input{Gradient w.r.t. top blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
-\Output{Gradient w.r.t. to bottom blob (M, $O_1, O_2$, $\dots$, $O_M$)}
-\BlankLine
-%\#pragma omp parallel for 
-\textbf{\#pragma omp parallel}
-\BlankLine
-\{
-\BlankLine
-\emph{/* Object Privatization */}
-\BlankLine
-Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
-\BlankLine
-caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
-\BlankLine
-\dots
-\BlankLine
-\textbf{\#pragma omp for private($s$, $d_1$, $d_2$, \dots)}
-\BlankLine
-\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$*$\dots$*$D_k$}{
-    \BlankLine
-    s = $f_s$(civ);
-    \BlankLine
-    $d_1$ = $f_1$(civ);
-    \BlankLine
-    $d_2$ = $f_2$(civ);
-    \BlankLine
-    \dots
-    \BlankLine
-    $d_k$ = $f_k$(civ);
-    \BlankLine
-    \For{$d_{\text{k+1}}$ $\leftarrow 1$ \KwTo $D_{\text{k+1}}$}{
-    \BlankLine
-    \dots
-    \BlankLine
-    \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
-}
-}
-}
-\textbf{\#pragma omp for ordered}
-\BlankLine
-\For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
-  caffe\_add(diffs-bottom, private-diffs-bottom, \dots);
-}
-\}
-\end{algorithm}
-
-%\begin{algorithm}
-%\caption{Coalesced Caffe layer backward phase}
-%\label{par-back-algo}
-%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
-%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
-%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
-%\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
-%\Output{Top blob for the layer transformation}
-%\BlankLine
-%\#pragma omp parallel for private(s, $d_1$, $d_2$, \dots)
-%\BlankLine
-%\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$}{
-%%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
-  %%\For{$d_2 \leftarrow 1$ \KwTo $D_2$}{
-%\BlankLine
-    %s = $f_s$(civ);
-%\BlankLine
-    %$d_1$ = $f_1$(civ);
-%\BlankLine
-    %$d_2$ = $f_2$(civ);
-%\BlankLine
-    %\dots
-%\BlankLine
-    %\For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      %private\_diffs[f($d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}(W, bias, bottom[g($d_1,d_2$, $\dots$, $d_N$)]);
-%}
-%%}
-%%}
-%}
-%\BlankLine
-%\#pragma omp barrier 
-%\BlankLine
-%\#pragma omp for ordered
-%\BlankLine
-%\For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
-  %caffe\_add(diffs, private\_diffs, \dots);
-%}
-%\end{algorithm}
-
 
 \subsection{Code Transformations}
 The Caffe framework is designed using object-oriented methodologies and uses a C++ implementation. 
@@ -279,6 +186,60 @@ the gradients. The private storage for the gradients has to be properly
 initialized to the neutral value of the reduction operation, in the case 
 the zero value (lines 4-5 in the algorithm). 
 
+\begin{algorithm}
+\setstretch{0.15}
+\small
+\caption{Coarse-grain parallel layer backward phase}
+\label{alg-par-back}
+%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\Input{Gradient w.r.t. top blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+\Output{Gradient w.r.t. to bottom blob (M, $O_1, O_2$, $\dots$, $O_M$)}
+\BlankLine
+%\#pragma omp parallel for 
+\textbf{\#pragma omp parallel}
+\BlankLine
+\{
+\BlankLine
+\emph{/* Object Privatization */}
+\BlankLine
+Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
+\BlankLine
+caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
+\BlankLine
+\dots
+\BlankLine
+\textbf{\#pragma omp for private($s$, $d_1$, $d_2$, \dots)}
+\BlankLine
+\For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$*$\dots$*$D_k$}{
+    \BlankLine
+    s = $f_s$(civ);
+    \BlankLine
+    $d_1$ = $f_1$(civ);
+    \BlankLine
+    $d_2$ = $f_2$(civ);
+    \BlankLine
+    \dots
+    \BlankLine
+    $d_k$ = $f_k$(civ);
+    \BlankLine
+    \For{$d_{\text{k+1}}$ $\leftarrow 1$ \KwTo $D_{\text{k+1}}$}{
+    \BlankLine
+    \dots
+    \BlankLine
+    \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
+      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+}
+}
+}
+\textbf{\#pragma omp for ordered}
+\BlankLine
+\For{$th \leftarrow 1$ \KwTo $omp\_get\_num\_threads()$}{
+  caffe\_add(diffs-bottom, private-diffs-bottom, \dots);
+}
+\}
+\end{algorithm}
 \subsection{Coarse-grain vs Fine-grain parallelization}
 The aim of this section is to describe the main differences between 
 the coarse-grain and fine-grain approaches when it comes to the 
