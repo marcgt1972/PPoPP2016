@@ -21,8 +21,7 @@ In algorithms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line
 In general, these computations correspond to matrix and
 vector operations like matrix-$\times$-vector and matrix-$\times$-matrix
 products. Caffe includes a native and limited BLAS implementation that 
-can be substituted with specialized libraries like Atlas \cite{Atlas}, OpenBLAS \cite{OpenBLAS} or Intel MKL \cite{MKL}. These implementations are 
-highly optimized and exploit both thread level parallelism and SIMD level parallelism with vectorized code.
+can be substituted with specialized libraries like Atlas, OpenBLAS  or Intel MKL \cite{blackford2002updated,dongarra2002preface}. These implementations are highly optimized and exploit both thread level parallelism and SIMD level parallelism with vectorized code.
 
 \subsubsection{Blob Level Parallelism}
 This level of parallelism corresponds to the nested loops in the forward
@@ -219,7 +218,7 @@ development. In this paper, we have followed a methodology to
 parallelize Caffe so that these principles are kept intact. We wanted to minimize 
 code reorganization for the optimization process.
 To indicate the parallelism to be exploited, only directive-based 
-transformations have been applied. We have used OpenMP \cite{Open-MP} directives 
+transformations have been applied. We have used OpenMP \cite{basumallik2007programming} directives 
 to indicate which loops have to be parallelized. Whenever possible, 
 we have used the OpenMP primitives to indicate data privatizations 
 and reduction operations, as well as the necessary synchronization 
@@ -240,7 +239,7 @@ layer code (lines 1-16). The original loop nest appears with a coalescing
 transformation where some of the outermost loops have been collapsed into a 
 single loop statement (line 6). A parallelizing directive for this loop 
 is inserted (line 5) specifying the parallel execution of this loop 
-under a static loop scheduling (default scheduling for OpenMP \cite{Open-MP}). 
+under a static loop scheduling (default scheduling for OpenMP \cite{basumallik2007programming}). 
 The loop coalescing transformation is related to the parallelization 
 process and is done to have effective control of the work distribution 
 under a static loop scheduling. To understand this issue, recall the 
