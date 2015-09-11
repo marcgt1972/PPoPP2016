@@ -44,6 +44,11 @@
 \usepackage[pdftex]{hyperref}
 \usepackage{url}
 
+%\usepackage{titlesec}
+%\titlespacing\section{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+%\titlespacing\subsection{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+%\titlespacing\subsubsection{0pt}{2pt plus 2pt minus 2pt}{2pt plus 2pt minus 2pt}
+
 \begin{document}
 
 \special{papersize=8.5in,11in}
@@ -66,7 +71,7 @@
                                   % short abstracts)
 
 %\titlebanner{banner above paper title}        % These are ignored unless
-\preprintfooter{short description of paper}   % 'preprint' option specified.
+%\preprintfooter{short description of paper}   % 'preprint' option specified.
 
 \title{Coarse Grain Parallelization of Deep Neural Networks}
 %\subtitle{Subtitle Text, if any}
@@ -114,14 +119,15 @@
 \input{related-work}
 
 \section{Conclusions}
+\input{conclusions}
 
-\appendix
-\section{Appendix Title}
+%\appendix
+%\section{Appendix Title}
 
 
-\acks
+%\acks
 
-Acknowledgments, if needed.
+%Acknowledgments, if needed.
 
 % We recommend abbrvnat bibliography style.
 \bibliography{ParallelCaffe}{}

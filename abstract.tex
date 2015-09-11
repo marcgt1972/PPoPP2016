@@ -4,17 +4,19 @@ An essential element for this success
 has been the introduction of high performance computing (HPC)
 techniques in the critical step of training the neural network. 
 This paper describes the implementation and
-analysis of a coarse grain parallelization of the DNN training algorithm
-with two significant features. 
-First, it enables multi-GPU
-execution without altering the algorithm convergence rate. Second,
-it exploits a parallelism level that is independent from the support
-of specialized and optimized libraries. 
-Therefore, the optimization
-is immediately available for accelerating the DNN training. 
-The parallelization
-has been implemented in Caffe, a state-of-the-art DNN framework. 
-The paper describes the code transformations for the parallelization as well as identifies limiting performance factors of the approach and expose appropriate optimizations. 
-We show competitive performance
-results for two state-of-the-art computer vision benchmarks, the
-MNIST and CIFAR-10 image classifiers.
+analysis of a network-agnostic and convergence-invariant
+coarse-grain parallelization of the DNN training algorithm.
+It exploits a parallelism level that is independent from the
+support of specialized and optimized libraries. Therefore, the
+optimization is immediately available for accelerating the DNN
+training. The proposal is compatible with multi-GPU execution without
+altering the algorithm convergence rate. The parallelization has
+been implemented in Caffe, a state-of-the-art DNN framework.
+The paper describes the code transformations for the parallelization
+and we also identify the limiting performance factors of the
+approach and expose appropriate optimizations. We show competitive
+performance results for two state-of-the-art computer vision
+datasets, MNIST and CIFAR-10. In particular, in a 16-core Xeon E5-2667
+at 3.30GHz we observe speedups of 8$\times$, at similar performance levels
+of those obtained by the GPU optimized Caffe version in a NVIDIA K40 GPU.
+

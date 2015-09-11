@@ -20,7 +20,7 @@ and the different types and levels of parallelism that exist within each layer.
 \end{figure}
 \begin{figure}[]
 \centering
-\includegraphics[width=6cm]{figures/blob2.pdf}
+\includegraphics[width=5cm]{figures/blob2.pdf}
 \caption{Example of layer transformation and its corresponding blob organization. Every 9 input segments generate the content of one segment in the output blob. This scheme is usual in deep neural networks for dimensionality reduction purposes. Pooling layers (e.g.: Caffe AVERAGE or MAX pooling layers) perform such type of computations.}
 \label{fig-blob-trans}
 \end{figure}
@@ -115,6 +115,7 @@ how the data flow across the layers in the forward and backward pass.
  
 %\IncMargin{1em}
 \begin{algorithm}
+%\small
 \caption{Iteration of the DNN training algorithm.}
 \label{alg-train}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -177,6 +178,7 @@ the training algorithm updates the network coefficients in all layers.
 This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 
 \begin{algorithm}
+%\small
 \caption{Layer forward phase}
 \label{alg-forw}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -200,6 +202,7 @@ This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 \end{algorithm}
 
 \begin{algorithm}
+%\small
 \caption{Layer backward phase}
 \label{alg-back}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -240,20 +243,29 @@ blobs that store the gradient computation (\emph{diffs\_bottom} and
 \emph{diffs\_top}).
 
 
-\begin{figure*}[]
-\centering
-%\includegraphics[width=\textwidth]{figures/mnist.pdf}
-\includegraphics[width=13.5cm]{figures/mnist.pdf}
-\caption{MNIST network.}
-\label{fig-mnist}
-\end{figure*}
+%\begin{figure*}[]
+%\centering
+%%\includegraphics[width=\textwidth]{figures/mnist.pdf}
+%\includegraphics[height=2cm]{figures/mnist.pdf}
+%%\includegraphics[width=13.5cm]{figures/mnist.pdf}
+%\caption{MNIST network: composed of 9 layers, organized in two sections. First data plus convolutional and pooling layers. Second, inner product and rectified linear units and loss.}
+%\label{fig-mnist}
+%\end{figure*}
+%
+%\begin{figure*}[]
+%\centering
+%%\includegraphics[width=\textwidth]{figures/cifar.pdf}
+%\includegraphics[height=3.5cm]{figures/cifar.pdf}
+%%\includegraphics[width=15cm]{figures/cifar.pdf}
+%\caption{CIFAR-10 network: composed 14 layers, organized in two sections. First, data plus convolutional, pooling, rectified linear units and local response normalization layers. Second, pooling and inner product and loss.}
+%\label{fig-cifar}
+%\end{figure*}
 
 \begin{figure*}[]
 \centering
-%\includegraphics[width=\textwidth]{figures/cifar.pdf}
-\includegraphics[width=15cm]{figures/cifar.pdf}
-\caption{CIFAR-10 network.}
-\label{fig-cifar}
+\includegraphics[width=\linewidth]{figures/mnist-cifar.pdf}
+\caption{MNIST network: composed of 9 layers, organized in two sections. First data plus convolutional and pooling layers. Second, inner product and rectified linear units and loss. CIFAR network: composed 14 layers, organized in two sections. First, data plus convolutional, pooling, rectified linear units and local response normalization layers. Second, pooling and inner product and loss.}
+\label{fig-mnist-cifar}
 \end{figure*}
 
 \subsection{Network Examples: MNIST and CIFAR-10}
@@ -274,7 +286,6 @@ a subset of the available layers within Caffe.
 Caffe supports a great variety of network layers. The following 
 paragraph describes the layers that are mostly used for computer vision, and 
 in particular, for the two example networks studied in this paper.
-
 The \textbf{Data Layer} corresponds to the first layer in the 
 network. This layer is responsible of fetching the data in batches and 
 feeding it to the network. The \textbf{Convolutional Layer} applies 

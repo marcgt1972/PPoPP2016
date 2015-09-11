@@ -74,6 +74,8 @@ gradients.
 %\end{algorithm}
 
 \begin{algorithm}
+%\small
+%\algsetup{linenosize=\footnotesize}
 \caption{Coarse-grain parallel layer forward phase}
 \label{alg-par-forw}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -81,20 +83,20 @@ gradients.
 \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
 \Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
 \Output{Top blob for the layer transformation}
-\BlankLine
+%\BlankLine
 %\#pragma omp parallel for 
 \textbf{\#pragma omp parallel}
-\BlankLine
+%\BlankLine
 \{
 \BlankLine
 \emph{/* Object Privatization */}
-\BlankLine
+%\BlankLine
 \dots
 \BlankLine
 \textbf{\#pragma omp for private($s$, $d_1$, $d_2$, \dots)}
 \BlankLine
 \For{$civ \leftarrow 1$ \KwTo $S*D_1$$*D_2$*$\dots$*$D_k$}{
-    \BlankLine
+    %\BlankLine
     s = $f_s$(civ);
     \BlankLine
     $d_1$ = $f_1$(civ);
@@ -118,6 +120,7 @@ gradients.
 \end{algorithm}
 
 \begin{algorithm}
+%\small
 \caption{Coarse-grain parallel layer backward phase}
 \label{alg-par-back}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -133,7 +136,7 @@ gradients.
 \BlankLine
 \emph{/* Object Privatization */}
 \BlankLine
-Blob private-diffs\_bottom(M, $O_1, O_2$, $\dots$, $O_M$);
+Blob private-diffs-bottom(M, $O_1, O_2$, $\dots$, $O_M$);
 \BlankLine
 caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
 \BlankLine
@@ -158,7 +161,7 @@ caffe\_zero($S*O_1$$*O_2$*$\dots$*$O_M$, private-diffs\_bottom);
     \dots
     \BlankLine
     \For{$d_N \leftarrow 1$ \KwTo $D_N$}{
-      private-diffs\_bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs\_top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+      private-diffs-bottom[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), top[h(s, $d_1,d_2$, $\dots$, $d_N$)], diffs-top[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
 }
 }
 }
@@ -290,6 +293,7 @@ the zero value (lines 4-5 in the algorithm).
 %process for the exploitation of this level of parallelism.}
 
 \begin{algorithm}
+%\small
 \caption{Fine-grain parallel layer forward phase}
 \label{alg-fine-par-forw}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
