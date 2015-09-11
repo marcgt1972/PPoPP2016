@@ -188,10 +188,11 @@ effective.
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-scalability-layer.pdf}
 \caption{CIFAR-10 - Layer scalability for CPU executions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis meausres speedup factors from the serial CPU execution.}
+\label{fig-cifar-scalability}
 \end{figure*}
 
 \subsection{The CIFAR-10 case}
-For the performance analysis of the CIFAr dataset we have followed the 
+For the performance analysis of the CIFAR-10 dataset we have followed the 
 same methodology as for the MNIST case. First, we have developped a 
 per-layer study both coarse-grain and fine-grain parallelizations. 
 For the coarse-grain case we identify what are the main limiting 
@@ -199,7 +200,7 @@ peformance factors. Then we describe the overall performance of the
 coarse-grain parallelization. 
 
 \subsubsection{Coarse-grain Layer Performance}
-The CIFAr-10 dataset generates a work granularity greater than 
+The CIFAR-10 dataset generates a work granularity greater than 
 the MNIST case. This can be observed in Figure \ref{fig-cifar-abs-rel}. 
 The figure shows per-layer absolute execution time and the relative 
 weigth in the overall execution time. It is clear that just a few 
@@ -213,7 +214,7 @@ determine the overall performance. Only the scalability of these
 dominating layers will determine the effectiveness of the 
 parallelization.
 
-Figure \ref{fig-cifar-scalabitly} shows the scalability curves of all layers. 
+Figure \ref{fig-cifar-scalability} shows the scalability curves of all layers. 
 Notice the appearance of the u-shape form as long as the number of threads 
 increases. The center part of each cluster corresponds to layers of very 
 small granularoty which do not affect the overall performance. These layers 
@@ -271,10 +272,11 @@ immediate layer in the second level.
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-abs-perf+gpu-layer.pdf}
 \caption{CIFAR-10 - \textbf{Leftmost side}: Absolute speedup factors for OpenMP (2, 4, 8, 12 and 16 threads), plain-GPU and cuDNN-GPU versions. performance. \textbf{Rightmost} side: GPU layer scalability for plain-GPU and cuDNN-GPU versions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}.}
+\label{fig-cifar-overall}
 \end{figure*}
 
 \subsubsection{Fine-grain Layer Performance}
-Rightmost side of Figure \ref{fig-cifar-abs} shows the per-layer
+Rightmost side of Figure \ref{fig-cifar-overall} shows the per-layer
 speedup numbers for the plain-GPU and cuDNN-GPU versions.
 For the plain-GPU version, the layer speedupos are impressive. 
 In the forward pass, all layers present speedups above 10x, and for 
