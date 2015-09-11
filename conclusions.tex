@@ -1,0 +1,24 @@
+In this paper we have analyzed the implementation of a coarse-grain 
+parallelization of the DNN training process. The approach has to 
+significant properties. On one side, the coarse-grain parallelization 
+is network-agnostic in the sense that it does not rely on any 
+specialized and higly tuned library for the specificities of the 
+netowrk layers. Besides, it does not require the programming efforts 
+related to recoding the layer implementation to adapt to such libraries. 
+Second, it is convergence-invariant as it does not change any of the 
+training parameters, thus ensuring consistency with the sequential 
+convergence rate.  The implementation has 
+been done in Caffe, a general and research oriented DNN framework. 
+The coarse-grain parallelization follows a directive-based style, 
+using OpenMP directives. We have identified its main 
+limiting performance factors as well as the main advantages and 
+disadvantages in front of a fine-grain parallelization.
+In particular, the implementationn of fine-grain strategies requires
+the recoding of all network transformations in order to port them 
+to the GPU device. For two state-of-the-art datasets (MNIST and CIFAR-10), 
+the observed performance levels are similar for both startegies. 
+Only when using specialized libraries available for specific transformations 
+like convolutional and pooling operations the fine-grain startegy makes a 
+difference in terms of performance and justifies all the programming efforts 
+associated to this approach.
+For future work the challenges are clear: switch to a parallel memory allocation and enabling the multi-GPU execution. Both features will translate in great performance improvements for the coarse-grain approach.
