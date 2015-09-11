@@ -113,7 +113,7 @@ the network. Algorithms \ref{alg-train}, \ref{alg-forw} and \ref{alg-back}
 show the high level structure of the training algorithm as well as 
 how the data flow across the layers in the forward and backward pass.
  
-%\IncMargin{1em}
+\setlength{\textfloatsep}{2pt}% Remove \textfloatsep
 \begin{algorithm}
 \setstretch{0.25}
 \small
@@ -178,6 +178,7 @@ backward phase. Once both the forward and backward phases are completed,
 the training algorithm updates the network coefficients in all layers. 
 This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 
+\setlength{\textfloatsep}{0pt}% Remove \textfloatsep
 \begin{algorithm}
 \setstretch{0.25}
 \small
@@ -203,6 +204,24 @@ This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 }
 \end{algorithm}
 
+Algorithm \ref{alg-forw} corresponds to the description of the structure 
+of one layer transformation. In general, the layer computation is organized 
+in a nest of loops that traverse the \emph{N+1} dimensions (\emph{S, D$_1$, 
+D$_2$, \dots, D$_N$}) of the layer input blob \emph{bottom} and produces 
+a transformation stored in the output blob \emph{top}. The first dimension 
+corresponds to the data samples in the batch. These are indexed with the 
+variable \emph{s}.  According to layer specific functions 
+(\emph{f} and \emph{g} in line 5 of the algorithm), 
+data segments in the input/ouput blobs are processed through basic linear 
+algebra transformations (\emph{BLAS} call in line 5) that are also 
+dependent to the data segment being processed (\emph{W} and \emph{b} 
+depend on the loop induction variables). Algorithm 
+\ref{alg-back} follows a very similar structure, but operating with 
+blobs that store the gradient computation (\emph{diffs\_bottom} and 
+\emph{diffs\_top}).
+
+
+\setlength{\textfloatsep}{0pt}% Remove \textfloatsep
 \begin{algorithm}
 \small
 \caption{Layer backward phase}
@@ -227,24 +246,6 @@ This corresponds to line 8 and procedure call to \emph{updateCoefficients}.
 }
 }
 \end{algorithm}
-
-Algorithm \ref{alg-forw} corresponds to the description of the structure 
-of one layer transformation. In general, the layer computation is organized 
-in a nest of loops that traverse the \emph{N+1} dimensions (\emph{S, D$_1$, 
-D$_2$, \dots, D$_N$}) of the layer input blob \emph{bottom} and produces 
-a transformation stored in the output blob \emph{top}. The first dimension 
-corresponds to the data samples in the batch. These are indexed with the 
-variable \emph{s}.  According to layer specific functions 
-(\emph{f} and \emph{g} in line 5 of the algorithm), 
-data segments in the input/ouput blobs are processed through basic linear 
-algebra transformations (\emph{BLAS} call in line 5) that are also 
-dependent to the data segment being processed (\emph{W} and \emph{b} 
-depend on the loop induction variables). Algorithm 
-\ref{alg-back} follows a very similar structure, but operating with 
-blobs that store the gradient computation (\emph{diffs\_bottom} and 
-\emph{diffs\_top}).
-
-
 %\begin{figure*}[]
 %\centering
 %%\includegraphics[width=\textwidth]{figures/mnist.pdf}
@@ -284,32 +285,32 @@ composed of 60,000 32$\times$32 color images with 10 classes:
 truck} with 6000 images per class. Both the networks are built with  
 a subset of the available layers within Caffe. 
 
-\subsubsection{Types of Layers}
-Caffe supports a great variety of network layers. The following 
-paragraph describes the layers that are mostly used for computer vision, and 
-in particular, for the two example networks studied in this paper.
-The \textbf{Data Layer} corresponds to the first layer in the 
-network. This layer is responsible of fetching the data in batches and 
-feeding it to the network. The \textbf{Convolutional Layer} applies 
-a group of convolutions to an image. Its parameters are the size of the 
-convolutional patch and the stride to apply along the image, among others. 
-In general, the coefficients in this type of layer are learnt so that 
-they capture what are the relevant data features 
-for the image classification. The \textbf{Pooling Layer} usually 
-follows the convolutional layer. In general, this layer applies an averaging 
-function over a subset of data points. The most usual functions are the 
-MAX pooling function, when the pooling layer selects the maximum value for the 
-subset, and the AVERAGE function, when the pooling layer computes the average 
-value of the subset. The \textbf{Local Response Normalization Layer} 
-performs a local normalization over a local region in the image. 
-This normalization can happen across the image channels or within the image 
-channels. The \textbf{Rectified Linear Unit Layer (ReLU)} computes 
-the max(x,0) function for each element in its input blob. 
-The \textbf{Inner Product Layer} also identified as a fully-connected layer, 
-performs a vector product between its input and coefficients.  
-The \textbf{Loss and Accuracy Layers} correspond 
-to the deepest layers in the network. They are responsible for evaluating the 
-loss function for the gradient computation and the overall network accuracy.
+%\subsubsection{Types of Layers}
+%Caffe supports a great variety of network layers. The following 
+%paragraph describes the layers that are mostly used for computer vision, and 
+%in particular, for the two example networks studied in this paper.
+%The \textbf{Data Layer} corresponds to the first layer in the 
+%network. This layer is responsible of fetching the data in batches and 
+%feeding it to the network. The \textbf{Convolutional Layer} applies 
+%a group of convolutions to an image. Its parameters are the size of the 
+%convolutional patch and the stride to apply along the image, among others. 
+%In general, the coefficients in this type of layer are learnt so that 
+%they capture what are the relevant data features 
+%for the image classification. The \textbf{Pooling Layer} usually 
+%follows the convolutional layer. In general, this layer applies an averaging 
+%function over a subset of data points. The most usual functions are the 
+%MAX pooling function, when the pooling layer selects the maximum value for the 
+%subset, and the AVERAGE function, when the pooling layer computes the average 
+%value of the subset. The \textbf{Local Response Normalization Layer} 
+%performs a local normalization over a local region in the image. 
+%This normalization can happen across the image channels or within the image 
+%channels. The \textbf{Rectified Linear Unit Layer (ReLU)} computes 
+%the max(x,0) function for each element in its input blob. 
+%The \textbf{Inner Product Layer} also identified as a fully-connected layer, 
+%performs a vector product between its input and coefficients.  
+%The \textbf{Loss and Accuracy Layers} correspond 
+%to the deepest layers in the network. They are responsible for evaluating the 
+%loss function for the gradient computation and the overall network accuracy.
 
 \subsubsection{Networks}
 The aim of this section is to briefly introduce the two networks 

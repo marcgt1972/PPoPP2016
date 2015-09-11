@@ -184,7 +184,10 @@ the global variable that stores the gradients.
 This mechanism requires the per-thread privatization of the blob storing 
 the gradients. The private storage for the gradients has to be properly 
 initialized to the neutral value of the reduction operation, in the case 
-the zero value (lines 4-5 in the algorithm). 
+the zero value (lines 4-5 in the algorithm). Notice that in order to 
+ensure convergence invariancy, the ordered construct is necessary. 
+A critical section solution would not ensure an update following the 
+original sequential order.
 
 \begin{algorithm}
 \setstretch{0.15}
