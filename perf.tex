@@ -11,14 +11,14 @@ OpenBLAS
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/mnist-scalability-layer.pdf}
-\caption{MNIST - Layer scalability for the CPU executions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis meausres speedup factors from the serial CPU execution.}
+\caption{MNIST - Layer scalability for the CPU executions. Layers are identified as in the legend for Figure \ref{fig-mnist-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis measures speedup factors from the serial CPU execution.}
 \label{fig-mnist-scalability}
 \end{figure*}
 
 \subsection{MNIST dataset}
 For the performance analysis of the MNIST dataset we have first 
-developped a per-layer study bothg coarse-grain and fine-grain parallelizations.For the coarse-grain case we identify what are the main limiting 
-peformance factors. Then we describe the overall performance of the 
+developed a per-layer study both coarse-grain and fine-grain parallelizations.For the coarse-grain case we identify what are the main limiting 
+performance factors. Then we describe the overall performance of the 
 coarse-grain parallelization. 
 
 \subsubsection{Coarse-grain Layer Performance}
@@ -34,30 +34,30 @@ For instance, the \emph{conv1} and conv2 layers, and in a smaller magnitude
 the pool1 and pool2 layers. After the convolutional and pooling layers, 
 the next significant layer is the inner product ip1. The rest of layers, 
 expose a very small contribution to the overall execution time 
-(e.g.: loss, relu and ip2 layers in their forward and backward phases).
+(e.g.: loss, ReLU and ip2 layers in their forward and backward phases).
 In general, notice that in each horizontal bar there is a zone where the 
 work in each layer phase decreases. This corresponds to the center part, 
-composed of the forward and backward phases of pool2, ip1, relu, ip2 and loss.
-This behaviour is associated to the dimensionality reduction that neural 
+composed of the forward and backward phases of pool2, ip1, ReLU, ip2 and loss.
+This behavior is associated to the dimensionality reduction that neural 
 networks do, and affects the work granularity for the parallelization process.
-Moreover, this behaviour limits the overall scalability of the training process.
+Moreover, this behavior limits the overall scalability of the training process.
 
 Figure \ref{fig-mnist-scalability} shows the scalability curve of each layer. 
-We identify three layer behaviours. First, notice the u-shape of the 
+We identify three layer behaviors. First, notice the u-shape of the 
 scalability trends for any number of threads. The center points 
 correspond to the layers that we have previously identified as not 
-significant in the overall execution time (e.g.: loss, relu and ip2 layers). 
+significant in the overall execution time (e.g.: loss, ReLU and ip2 layers). 
 These layers do not scale at all, but they do not represent a limitation for 
 the overall performance. The two sides on the center values correspond 
 to the forward and backward phases of the rest layers. For these, we detect 
-two types of layer behaviour. 
+two types of layer behavior. 
 
 Layers ip1 and pool2 present very poor scalability curves. 
 For ip1, in both the forward and backward phases, the layer 
 presents speedups of 4,58 and 5,93 for the forward and backward 
 phases respectively and with 8 threads. The layer does not improve 
 the speedup with more threads. The pool2 layer exposes the same 
-behaviour with maximum speedup of 5.52 and 5.73 with 8 threads in 
+behavior with maximum speedup of 5.52 and 5.73 with 8 threads in 
 the forward and backward phases respectively. The reason for this 
 behavior is two fold. First, notice the two layers are immediately 
 stacked one on top of the other. This means that the 
@@ -69,9 +69,9 @@ work and data distribution coming out from the parallelization. When
 it comes the execution of the ip1 layer, its parallelization is done 
 according to its input blob dimensions (output blob of pool2), which do 
 not match those of the input blob for the pool2 layer. Thus, theres is 
-an unvoidable lost of locality for the execution of the ip1 layer. 
+an unavoidable lost of locality for the execution of the ip1 layer. 
 Second, both layers suffer from a poor granularity when executing with 
-more thatn 8 threads. In Figure \ref{fig-mnist-abs-rel} we observe that 
+more than 8 threads. In Figure \ref{fig-mnist-abs-rel} we observe that 
 with more than 8 threads the forward and backward phases of the two layers 
 are in the range of 350 microseconds.
 
@@ -120,24 +120,24 @@ includes a cuDNN-based version. We identify this version as the
 %pooling layers dominate the GPU execution. 
 Rightmost side of Figure \ref{fig-mnist-overall} shows the per-layer 
 speedup numbers for the plain-GPU and cuDNN-GPU versions. 
-For the plain-GPU version, all layers present speedupd below 
-the 10x bar unless for specific exceptions. The pool1 and pool2 
-layers expose extraordinary speedups of 57x and 62x for their 
+For the plain-GPU version, all layers present speedup below 
+the 10$\times$ bar unless for specific exceptions. The pool1 and pool2 
+layers expose extraordinary speedups of 57$\times$ and 62$\times$ for their 
 forward phase respectively. The pool2 layer presents a speedup of 
-12.81x in its backward phase and the ip1 layer is also above the 
-10x bar with a speedup of 12.25x in its backward phase.
+12.81$\times$ in its backward phase and the ip1 layer is also above the 
+10$\times$ bar with a speedup of 12.25$\times$ in its backward phase.
 In contrast, the convolutional layers present a very poor speedup, with 
-1.11, 1.63 for ther forward phases of conv1 and conv2, and 0.43x and 2.86x 
-in their respective backward phases. 
+1.11, 1.63 for the forward passes of conv1 and conv2, and 0.43$\times$ and 2.86$\times$ 
+in their respective backward passes. 
 
 For the cuDNN-GPU, the results are similar, unless for the convolutional 
 and pooling layers. The conv1 and conv2 layers experiment an extraordinary 
-improvement reaching speedups of 15x, 25x, 19x and 8x in their 
+improvement reaching speedups of 15$\times$, 25$\times$, 19$\times$ and 8$\times$ in their 
 forward and backward phases. In contrast, the pool2 layer experiments a 
-dramatic loss of performance: it drops from 62x to 27x in its forward 
-phase and from 12.81x to 8.81x in its backward phase. More moderately, 
-the relu layer also suffers a performance drop from 2.47x to 1.74x and 
-from 4x to 2,41x in its froward and backward phases respectively. 
+dramatic loss of performance: it drops from 62$\times$ to 27$\times$ in its forward 
+phase and from 12.81$\times$ to 8.81$\times$ in its backward phase. More moderately, 
+the ReLU layer also suffers a performance drop from 2.47$\times$ to 1.74$\times$ and 
+from 4$\times$ to 2,41$\times$ in its froward and backward passes respectively. 
 In general, cuDNN corresponds to a case where the industry has deployed 
 a highly optimized implementation of layer transformations that well 
 understood and no longer in a research stage. In this situation, the 
@@ -153,14 +153,14 @@ efforts.
 Figure \ref{fig-mnist-overall} shows the overall performance of
 the coarse-grain parallelization and the fine-grain parallelization in 
 its two versions GPU and GPU-cuDNN. The coarse-grain reaches a speedup 
-close to a 6x with 8 threads, and 8x with 16 threads. The lack of 
+close to a 6$\times$ with 8 threads, and 8$\times$ with 16 threads. The lack of 
 the scalability for the CPU version is related to the poor scalability 
 of fine-grained layers that when executing with 16 threads drag down 
 the performance. In addition, we suspect the serial initialization of 
 the network structures is giving a suboptimal memory allocation in 
 the NUMA nodes. All of this is affecting the final scalability of 
 the coarse-grain version. The fine-grain GPU version shows a 
-modest speed up close to 2x. The reason for this difference is related 
+modest speed up close to 2$\times$. The reason for this difference is related 
 to the performance of the convolutional layers. In general, this version 
 corresponds to a base line defined by the Caffe native implementation 
 of the GPU acceleration. It represents a case for the performance the DNN 
@@ -170,7 +170,7 @@ both a CPU and GPU implementation to guarantee GPU acceleration.
 In conclusion, the coarse-grain approach minimizes the coding efforts 
 and delivers better performance levels. Of course, when compared to 
 the cuDNN case, the fine-grain approach makes a difference. 
-It delivers a 12x speedup. But solutions like the cuDNN framework are 
+It delivers a 12$\times$ speedup. But solutions like the cuDNN framework are 
 only available when the layer types and their implementation have become 
 a product and are no longer in a research stage. Thus, they can have a 
 highly optimized implementation. For a DNN framework like Caffe, 
@@ -187,23 +187,23 @@ effective.
 
 \begin{figure*}[]
 \includegraphics[width=\textwidth]{figures/cifar-scalability-layer.pdf}
-\caption{CIFAR-10 - Layer scalability for CPU executions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis meausres speedup factors from the serial CPU execution.}
+\caption{CIFAR-10 - Layer scalability for CPU executions. Layers are identified as in the legend for Figure \ref{fig-cifar-abs-rel}. Layers in the legend are ordered from left-to-right in each cluster. Clusters correspond to the cases of 2, 4, 8, 12 and 16 threads. Y-axis measures speedup factors from the serial CPU execution.}
 \label{fig-cifar-scalability}
 \end{figure*}
 
 \subsection{The CIFAR-10 case}
 For the performance analysis of the CIFAR-10 dataset we have followed the 
-same methodology as for the MNIST case. First, we have developped a 
+same methodology as for the MNIST case. First, we have developed a 
 per-layer study both coarse-grain and fine-grain parallelizations. 
 For the coarse-grain case we identify what are the main limiting 
-peformance factors. Then we describe the overall performance of the 
+performance factors. Then we describe the overall performance of the 
 coarse-grain parallelization. 
 
 \subsubsection{Coarse-grain Layer Performance}
 The CIFAR-10 dataset generates a work granularity greater than 
 the MNIST case. This can be observed in Figure \ref{fig-cifar-abs-rel}. 
 The figure shows per-layer absolute execution time and the relative 
-weigth in the overall execution time. It is clear that just a few 
+weight in the overall execution time. It is clear that just a few 
 layers dominate the execution, no matter the number of threads. 
 These layers are the convolutional and pooling layers, and with 
 less weight the local response normalization layers. In general, 
@@ -217,54 +217,54 @@ parallelization.
 Figure \ref{fig-cifar-scalability} shows the scalability curves of all layers. 
 Notice the appearance of the u-shape form as long as the number of threads 
 increases. The center part of each cluster corresponds to layers of very 
-small granularoty which do not affect the overall performance. These layers 
+small granularity which do not affect the overall performance. These layers 
 are the pool3, ip1 and loss. The center part includes both the forward 
 and backward phases of these layers. Leftmost part of each cluster 
-correspopnd to the layer forward phases, the rightmost part corresponds 
+correspond to the layer forward phases, the rightmost part corresponds 
 to the layer backward phases.
 
-The CIFAR-10 network is organanized in three levels all of them with a 
+The CIFAR-10 network is organized in three levels all of them with a 
 similar organization. First level corresponds to a sequence of a data 
-layer plus conv1+pool1+relu1+norm1. During the forward phase, the data 
+layer plus conv1+pool1+ReLU1+norm1. During the forward phase, the data 
 layer fetches the input data (e.g: the batch images) sequentially so 
-the conv1 layer suffers from poor lacality respect its input data 
+the conv1 layer suffers from poor locality respect its input data 
 (the same situation observed with the MNIST case). The work distribution 
-is constant across the conv1, pool1 and relu1 layers, and then changes 
+is constant across the conv1, pool1 and ReLU1 layers, and then changes 
 for the norm1. According to this, the conv1 has a 
-reasonable speedup up to 8 threads (5.87x) but for 16 threads the 
-scalability drops with a 9x speedup. This is explained by the 
+reasonable speedup up to 8 threads (5.87$\times$) but for 16 threads the 
+scalability drops with a 9$\times$ speedup. This is explained by the 
 sequential execution of its immediate previous layer and by the fact 
 that when crossing the 8 thread border, NUMA considerations come into 
 play. The effects of data movement are much more visible than when 
 just executing in one NUMA node. After the conv1 forward execution, 
-the pool1 and relu1 layers keep the same work distribution and expose 
-reasonable speedups: 6.5x and 7x respectively with 8 threads. These 
-layers scale up to 11x and 13x with 16 threads. The norm1 layer exposes 
+the pool1 and ReLU1 layers keep the same work distribution and expose 
+reasonable speedups: 6.5$\times$ and 7$\times$ respectively with 8 threads. These 
+layers scale up to 11$\times$ and 13$\times$ with 16 threads. The norm1 layer exposes 
 a different trend. This layer executes changing the data-thread 
-distribution. With 8 threads reaches a 4.6x speedup and with 
-16 threads 10.8x. Regarding the backward phase of all the layers 
+distribution. With 8 threads reaches a 4.6$\times$ speedup and with 
+16 threads 10.8$\times$. Regarding the backward phase of all the layers 
 in this first level, the relation between the layers are similar, 
 but with less scalability. The maximum speedup for 16 threads are 
-10x, 6.6x, 7.75x for the conv1, pool1, relu1 and norm1 layers respectively. 
-The reduction operations within the backward phase are negleagible, 
+10$\times$, 6.6$\times$, 7.75$\times$ for the conv1, pool1, ReLU1 and norm1 layers respectively. 
+The reduction operations within the backward pass are negligible, 
 given the work size in each layer for the CIFAR-10 case. This happens 
-in all the nettwork levels.
+in all the network levels.
 
-The second level in the network is composed of layers conv2, relu2 
+The second level in the network is composed of layers conv2, ReLU2 
 and norm2. In this level, the sizes of the input/output blobs decrease 
 and the work granularity too, but with the exception of layer conv2. 
-This workingset size reduction affects the overall scalability, 
+This working set size reduction affects the overall scalability, 
 specially with 16 threads. In this level, the maximum speedups are 
-8.25x, 8.5x, 9x and 7x. In this case, the data-thread relation between the 
+8.25$\times$, 8.5$\times$, 9$\times$ and 7$\times$. In this case, the data-thread relation between the 
 layers is constant, unless for the norm2 layer. Specifically for the 
 first layer in this level, the conv2 layer, its poor scalability is 
 related to its immediate previous layer, the norm1 layer. This layer 
 changes the data-thread distribution and the conv2 layer is affected 
-by this fact. For the backward phase, the performnce trends are similar, 
+by this fact. For the backward pass, the performance trends are similar, 
 and again the reduction operations do not reduce the overall layer 
 scalability.
 
-Finally, the third level is composed by the conv3, relu3 and pool3 
+Finally, the third level is composed by the conv3, ReLU3 and pool3 
 layers. This level follows a similar performance trends as the second 
 level, with the same relations between its layers and between the 
 immediate layer in the second level.
@@ -278,21 +278,21 @@ immediate layer in the second level.
 \subsubsection{Fine-grain Layer Performance}
 Rightmost side of Figure \ref{fig-cifar-overall} shows the per-layer
 speedup numbers for the plain-GPU and cuDNN-GPU versions.
-For the plain-GPU version, the layer speedupos are impressive. 
-In the forward pass, all layers present speedups above 10x, and for 
-the pooling and lrn layers the speedups are close to 110x and 40x 
-respectively (depending on the layer intsance and pass in the network). 
+For the plain-GPU version, the layer speedups are impressive. 
+In the forward pass, all layers present speedups above 10$\times$, and for 
+the pooling and LRN layers the speedups are close to 110$\times$ and 40$\times$
+respectively (depending on the layer instance and pass in the network). 
 The convolutional layers are represent the bottleneck. they present 
-speedups between 1.8x and 6x depending on the layer position in the 
+speedups between 1.8$\times$ and 6$\times$ depending on the layer position in the 
 network and in the pass (forward or backward).
 
 For the cuDNN-GPU, the trends are similar as in the MNISt case 
 regarding the convolutional and pooling layers. The convolutional 
 layers expose impressive improvements. They switch to performance 
-levels close to 50x of speedup in some cases (conv2 layer).
+levels close to 50$\times$ of speedup in some cases (conv2 layer).
 Some of the pooling layers expose drastic performance drops (pool3 
-forward pass switches from 42x to 11.75x). Others improve the 
-performance (pool1 from 8.6x to 20.9x). 
+forward pass switches from 42$\times$ to 11.75$\times$). Others improve the 
+performance (pool1 from 8.6$\times$ to 20.9$\times$). 
 As it was stated with the MNIST dataset, cuDNN corresponds to a case 
 where the industry has deployed a highly optimized implementation of 
 specific layer transformations that are well understood and no longer 
@@ -303,14 +303,14 @@ a difference, though after the corresponding recoding efforts.
 Figure \ref{fig-cifar-overall} shows the overall performance of
 the coarse-grain parallelization and the fine-grain parallelization in
 its two versions GPU and GPU-cuDNN. The coarse-grain reaches a speedup
-close to a 6x with 8 threads, and 8.83x with 16 threads. The lack of
+close to a 6$\times$ with 8 threads, and 8.83$\times$ with 16 threads. The lack of
 the scalability for the CPU version is related to the poor scalability
 of some of the convolutional layers. This is caused by poor data locality caused by consecutive layers with different data-thread patterns. 
 In addition, again the serial initialization of
 the network structures is giving a suboptimal memory allocation in
 the NUMA nodes. All of this is affecting the final scalability of
 the coarse-grain version. The fine-grain GPU version shows a
-modest speed up close to 6x. Both the fine-grain GPU version and 
+modest speed up close to 6$\times$. Both the fine-grain GPU version and 
 coarse-grain CPU version expose problems with the convolutional layers.
 In general, the fine-grain GPU version corresponds to the Caffe native 
 implementation. This implementation is representative of the 
@@ -321,7 +321,7 @@ As with the MNIST case, when compared to the cuDNN case, the fine-grain
 approach makes a difference and this time even greater. cuDNN gives 
 extraordinary speedups and it corresponds to an unbeatable implementation 
 of the convolutional and pooling layers made by NVIDIA. It delivers a 
-27x speedup. Unfortunatelly, this performance levels are only available 
+27$\times$ speedup. Unfortunately, this performance levels are only available 
 for these two layer types. In contrast, the coarse-grain approach is 
 immediately available no matter the nature of the deep neural network.
 
@@ -329,7 +329,7 @@ immediately available no matter the nature of the deep neural network.
 In this section we present the lessons learnt regarding the coarse-grain 
 and fine-grain parallelizations of the DNN training process. We identify 
 several limiting factors that affect the performance of the 
-coarse-grain parallelization. These factors are layer dependant and are 
+coarse-grain parallelization. These factors are layer dependent and are 
 mainly related to specificities of the layers that determine their 
 work distribution, memory footprint, data privatization and ordered 
 operations. Also, we identify the advantages and disadvantages of 
@@ -338,7 +338,7 @@ The following subsections describe these limiting factors,
 advantages and disadvantages.
 
 \textbf{Network agnostic}: one important advantage of the coarse-grain 
-approach is that it exploits a parallelism level that is independant of 
+approach is that it exploits a parallelism level that is independent of 
 the nature of the neural network. The batch-level parallelism is 
 intrinsic to the gradient descent algorithm. Thus, this approach is 
 immediately available and does not require programming efforts to generate 
@@ -350,7 +350,7 @@ change any training parameters. Thus, the convergence rate is kept
 invariant between the serial and the parallel executions. 
 For the DNN community this is an important advantage. Before 
 the training, neural networks need a parameter tuning process to ensure 
-appropriate convergence. The parallelization has to ensure that the effects of this tuning are kept for the paralell execution.
+appropriate convergence. The parallelization has to ensure that the effects of this tuning are kept for the parallel execution.
 
 \textbf{Sequential memory allocation}: the network memory allocation
 happens during the network initialization. This process is sequential, 
@@ -361,7 +361,7 @@ the training process.
 
 \textbf{Locality between layers:} the input/output relation across layers
 defines a lost of data locality for specific layers. During the forward 
-and backward phases, each layer distributes the work according to the 
+and backward passes, each layer distributes the work according to the 
 dimensions of the input blobs. Regarding the data locality, it is 
 possible that input and output blobs do not match
 their dimensions. Consequently, the work distribution and data-thread
