@@ -282,7 +282,39 @@ initialized to the neutral value of the reduction operation, in the case
 the zero value (lines 4-5 in the algorithm). 
 
 \subsection{Coarse-grain vs Fine-grain parallelization}
-%\todo{coalescing happens different. In gPU it happens fro the innermost loops. In CPU fro the outermost loops. GPU exploits finer grain,CPU coarser grain }
+The aim of this section is to describe the main differences between 
+the coarse-grain and fine-grain approaches when it comes to the 
+parallelization of a layer transformation. If for the coarse-grain 
+case the outermost loop is parallelized after approapriate loop 
+coalescing, the fine-grain approach focusses on the innermost loops.
+Similarly, this approach coalesces as much as possible inner loops 
+so that enough work is generated for the fine-grain threads in 
+the GPU device. It is this process what requieres consideable programming 
+efforts. The inner loop coalescing has to be done having in mind the 
+work distribution mechanisms for GPU threads. Here we refer to the 
+thread \emph{blocks} and \emph{grids}. In general, the more loops 
+are coalesced, the more effective the parallelization. Regarding the 
+programming efforts, after the loop transformation, the resulting loop 
+has to be extracted and generate a GPU kernel. Also, introduce all 
+necessary data transfers between host and guest device before and after 
+the kernel execution. Clearly, when compared to the coarse-grain 
+parallelization, the programming efforts are much more significant in 
+the case of the fine-grain parallelizatioin. At this point, what we 
+have identified as network-agnostic feature becomes evident and 
+important. Because the coarse-grain transformations are done from 
+the outermost loop (batch-level parallelism) to the inner loops, 
+the recoding efforts are independent from the layer 
+transformation. The programmer has to parallelize 
+the batch-level loop withoput any other consideration that apply 
+the necessary data privatizations. That loop level is always 
+parallel in the gradient descent algorithm. Then, if possible, 
+coalesce with immediate inner loops for optimization. In the fine-grain 
+parallelization, the programmer has to know about the exact and 
+optimal data layout to be genrated. Also, has to have knowledge of 
+what is computing the layer transformation. And finally, recode 
+the implementation.
+
+%\todo{coalescnng happens different. In gPU it happens fro the innermost loops. In CPU fro the outermost loops. GPU exploits finer grain,CPU coarser grain }
 %\todo{emphasis in recoding, CPU version does not need recoding. }
 
 %\todo{Caffe is already optimized to exploit the BLAS level parallelism with GPUs. 

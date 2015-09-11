@@ -5,7 +5,7 @@ The machine run Red Hat Enterprise Linux Server release 6.6 (Santiago),
 and we have used the GCC compiler suite version g++ (GCC) 4.4.7 20120313 
 (Red Hat 4.4.7-11). The Caffe framework uses OpenBLAS for the implementation 
 of basic linear algebra subsoutines. For the GPU programming, we have 
-used CUDA toolkit 7.0 and cuDNN. The datasets used for the evaluation are 
+used cuda toolkit 7.0 and cuDNN. The datasets used for the evaluation are 
 the MNIST and CIFAR-10 image classifiers.
 
 \begin{figure*}[]
@@ -379,7 +379,7 @@ first parallel processing layer in the network is executes in parallel.
 For the Caffe case, we have detected that batch-level parallelism 
 defines very heavy iterations for the parallelized loops.
 Therefore, one single loop iteration can cause a high unbalance
-between the executing threads. 
+between the executing threads. Loop coalescing has been applied to reduce the effect of this problem.
 \textbf{Work granularity:} neural networks do
 a dimensionality reduction over the processed data.
 And this affects the size of the working sets in the network layers.

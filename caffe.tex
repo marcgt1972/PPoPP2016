@@ -318,16 +318,16 @@ the deeper the layers, the smaller the size of the input/output blobs.
 Thus, the level in the network will affect the work granularity of the 
 existing parallelism within the layer. 
 
-Figure \ref{fig-mnist} shows the layer composition for the MNIST network. 
+Figure \ref{fig-mnist-cifar} shows the layer composition for the MNIST network. 
 This network is composed of an initial data layer followed by the 
 combination of two instances of convolutional and pooling layers. The 
 convolutional layers are responsible for feature learning while the 
 pooling layers correspond to dimensionality reduction. 
 This is followed by a inner product layer (ip) and ReLU layer which furthermore reduces the dimensionality 
 of the data traversing the network, until the last inner product layer which 
-outputs a vector of 10 elements, one per digit class. The last layer corresponds to a loss layer.
-
-Figure \ref{fig-cifar} shows the layer composition for the CIFAR network. 
+outputs a vector of 10 elements, one per digit class. The last layer 
+corresponds to a loss layer.  
+Figure \ref{fig-mnist-cifar} shows the layer composition for the CIFAR network. 
 As in the previous network, the first layer is a data layer, followed by 
 the combination of convolutional, ReLU and pooling layers. Again, convolutional 
 layers perform the feature learning and pooling layers perform the 
