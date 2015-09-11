@@ -17,7 +17,6 @@ are based on basic linear algebra operations. It appears in the
 BLAS computations executed for each data segment in the input/output blobs.
 In algorithms \ref{alg-forw} and \ref{alg-back} the BLAS calls in line 
 6 in both cases hide this level of parallelism.
-
 In general, these computations correspond to matrix and
 vector operations like matrix-$\times$-vector and matrix-$\times$-matrix
 products. Caffe includes a native and limited BLAS implementation that 
@@ -31,7 +30,6 @@ These loops traverse the data segments in the input and output blobs and
 perform BLAS calls for each segment. This kind of parallelism can be
 achieved with thread level parallelism as each BLAS call can be
 executed in parallel.
-
 In general, the dimensions of the input blob are layer dependent. Therefore the number of iterations in each loop level is also layer dependent. All loops are 
 interchangeable and parallel, given the appropriate data privatizations. 
 So, in order to have control of the most appropriate loop scheduling, 
@@ -74,7 +72,7 @@ gradients.
 %\end{algorithm}
 
 \begin{algorithm}
-%\small
+\small
 %\algsetup{linenosize=\footnotesize}
 \caption{Coarse-grain parallel layer forward phase}
 \label{alg-par-forw}
@@ -120,7 +118,7 @@ gradients.
 \end{algorithm}
 
 \begin{algorithm}
-%\small
+\small
 \caption{Coarse-grain parallel layer backward phase}
 \label{alg-par-back}
 %\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
@@ -305,13 +303,13 @@ important. Because the coarse-grain transformations are done from
 the outermost loop (batch-level parallelism) to the inner loops, 
 the recoding efforts are independent from the layer 
 transformation. The programmer has to parallelize 
-the batch-level loop withoput any other consideration that apply 
+the batch-level loop without any other consideration than apply 
 the necessary data privatizations. That loop level is always 
 parallel in the gradient descent algorithm. Then, if possible, 
 coalesce with immediate inner loops for optimization. In the fine-grain 
-parallelization, the programmer has to know about the exact and 
-optimal data layout to be genrated. Also, has to have knowledge of 
-what is computing the layer transformation. And finally, recode 
+parallelization, the programmer has to have knowledge of what is 
+the nature odf the layer computation. Also, has to know about the exact and 
+optimal data layout to be generated. And finally, recode 
 the implementation.
 
 %\todo{coalescnng happens different. In gPU it happens fro the innermost loops. In CPU fro the outermost loops. GPU exploits finer grain,CPU coarser grain }
@@ -324,34 +322,34 @@ the implementation.
 %the target of this paper. Section XX describes the parallelization 
 %process for the exploitation of this level of parallelism.}
 
-\begin{algorithm}
-%\small
-\caption{Fine-grain parallel layer forward phase}
-\label{alg-fine-par-forw}
-%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
-%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
-\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
-\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
-\Output{Top blob for the layer transformation}
-\BlankLine
-\For{$s \leftarrow 1$ \KwTo $S$}{
-\BlankLine
-\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
-    \dots
-\BlankLine
-    \For{$d_k \leftarrow 1$ \KwTo $D_k$}{
-      \For{$civ \leftarrow 1$ \KwTo $D_{\text{k+1}}$*$\dots$*$D_N$}{
-        \BlankLine
-        $d_{\text{k+1}}$ = $f_{\text{k+1}}$(civ);
-        \BlankLine
-        \dots
-        \BlankLine
-        $d_N$ = $f_N$(civ);
-        \BlankLine
-          top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
-}
-}
-}
-}
-\end{algorithm}
+%\begin{algorithm}
+%%\small
+%\caption{Fine-grain parallel layer forward phase}
+%\label{alg-fine-par-forw}
+%%\SetKwData{Left}{left}\SetKwData{This}{this}\SetKwData{Up}{up}
+%%\SetKwFunction{Union}{Union}\SetKwFunction{FindCompress}{FindCompress}
+%\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+%\Input{Bottom blob (S, N+1, $D_1, D_2$, $\dots$, $D_N$)}
+%\Output{Top blob for the layer transformation}
+%\BlankLine
+%\For{$s \leftarrow 1$ \KwTo $S$}{
+%\BlankLine
+%\For{$d_1 \leftarrow 1$ \KwTo $D_1$}{
+    %\dots
+%\BlankLine
+    %\For{$d_k \leftarrow 1$ \KwTo $D_k$}{
+      %\For{$civ \leftarrow 1$ \KwTo $D_{\text{k+1}}$*$\dots$*$D_N$}{
+        %\BlankLine
+        %$d_{\text{k+1}}$ = $f_{\text{k+1}}$(civ);
+        %\BlankLine
+        %\dots
+        %\BlankLine
+        %$d_N$ = $f_N$(civ);
+        %\BlankLine
+          %top[f(s, $d_1,d_2$, $\dots$, $d_N$)]=\textbf{BLAS}($W$($d_1,d_2$, $\dots$, $d_N$), bias($d_1,d_2$, $\dots$, $d_N$), bottom[g(s, $d_1,d_2$, $\dots$, $d_N$)]);
+%}
+%}
+%}
+%}
+%\end{algorithm}
 

@@ -3,10 +3,11 @@ the Caffe DNN framework. All exeperiments have been performaed
 in a 16-core Xeon E5-2667 at 3.30GHz with a NVIDIA K40 GPU. 
 The machine run Red Hat Enterprise Linux Server release 6.6 (Santiago), 
 and we have used the GCC compiler suite version g++ (GCC) 4.4.7 20120313 
-(Red Hat 4.4.7-11). The Caffe framework uses OpenBLAS for the implementation 
-of basic linear algebra subsoutines. For the GPU programming, we have 
-used cuda toolkit 7.0 and cuDNN. The datasets used for the evaluation are 
-the MNIST and CIFAR-10 image classifiers.
+(Red Hat 4.4.7-11). We configured the Caffe framework to use OpenBLAS 
+for the implementation of basic linear algebra subsoutines. 
+For the GPU programming, we have used cuda toolkit 7.0 and cuDNN. 
+The datasets used for the evaluation are the MNIST and CIFAR-10 
+image classifiers.
 
 \begin{figure*}[]
 \includegraphics[width=\linewidth]{figures/mnist-rel-abs-time.pdf}
@@ -321,7 +322,6 @@ In general, the fine-grain GPU version corresponds to the Caffe native
 implementation. This implementation is representative of the 
 performance the DNN community can obtain after the associated recoding 
 efforts. The coarse-grain parallelization gives similar performance levels, but not requiring the reimplementation of all layers to target the GPU device. 
-
 As with the MNIST case, when compared to the cuDNN case, the fine-grain 
 approach makes a difference and this time even greater. cuDNN gives 
 extraordinary speedups and it corresponds to an unbeatable implementation 
